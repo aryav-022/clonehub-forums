@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.scrollbar-thin {
+	--scrollbar-thumb-color: #ddd;
+	--scrollbar-track-color: transparent;
+	--scrollbar-width: 0.5rem;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+	width: var(--scrollbar-width);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+	background: var(--scrollbar-thumb-color);
+	border-radius: 1rem;
+	visibility: hidden;
+	-webkit-transition: 0.3s all;
+	transition: 0.3s all;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar-thumb {
+	visibility: visible;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+	background: var(--scrollbar-track-color);
+}
+

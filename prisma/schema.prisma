@@ -1,0 +1,150 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String?
+    access_token      String?
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String?
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    userId       String
+    sessionToken String   @unique
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    username      String?   @unique
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    accounts      Account[]
+    sessions      Session[]
+
+    createdCommunities Community[]   @relation("CreatedCommunities")
+    joinedCommunities  Community[]   @relation("JoinedCommunities")
+    createdPosts       Post[]
+    votes              Vote[]
+    comments           Comment[]
+    commentVotes       CommentVote[]
+}
+
+model VerificationRequest {
+    id         String   @id @default(cuid())
+    identifier String
+    token      String   @unique
+    expires    DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    @@unique([identifier, token])
+}
+
+model Community {
+    id          String   @id @default(cuid())
+    name        String   @unique
+    description String?
+    image       String?
+    banner      String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    creator   User   @relation("CreatedCommunities", fields: [creatorId], references: [id])
+    creatorId String
+
+    members User[] @relation("JoinedCommunities")
+
+    posts Post[]
+
+    @@index([name])
+    @@map("Communities")
+}
+
+model Post {
+    id        String   @id @default(cuid())
+    title     String
+    content   Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    author   User   @relation(fields: [authorId], references: [id])
+    authorId String
+
+    community   Community @relation(fields: [communityId], references: [id])
+    communityId String
+
+    votes Vote[]
+
+    comments Comment[]
+}
+
+enum VoteType {
+    UP
+    DOWN
+}
+
+model Vote {
+    type VoteType
+
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId String
+
+    @@id([userId, postId])
+}
+
+model Comment {
+    id        String   @id @default(cuid())
+    content   String
+    createdAt DateTime @default(now())
+
+    author   User   @relation(fields: [authorId], references: [id])
+    authorId String
+
+    post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId String?
+
+    replyTo   Comment?  @relation("Replies", fields: [replyToId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+    replyToId String?
+    replies   Comment[] @relation("Replies")
+
+    commentVotes CommentVote[]
+}
+
+model CommentVote {
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+
+    comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+    commentId String
+
+    type VoteType
+
+    @@id([userId, commentId])
+}
