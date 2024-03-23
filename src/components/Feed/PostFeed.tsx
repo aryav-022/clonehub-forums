@@ -32,7 +32,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where }) => {
 				}
 			})();
 		}
-	}, [entry]);
+	}, [entry, posts, where]);
 
 	return (
 		<>

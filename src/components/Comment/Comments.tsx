@@ -54,7 +54,7 @@ const Comments: FC<CommentsProps> = ({ postId, replyToId, comments, setComments,
 				}
 			})();
 		}
-	}, [entry]);
+	}, [entry, comments, postId, replyToId, setComments, toast]);
 
 	return (
 		<ul className="m-4 space-y-4 border-l-2 pl-6">
