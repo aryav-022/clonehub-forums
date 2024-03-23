@@ -14,10 +14,9 @@ import { useToast } from "../ui/Toast";
 
 interface EditorProps {
 	slug: string;
-	communityId: string;
 }
 
-const Editor: FC<EditorProps> = ({ slug, communityId }) => {
+const Editor: FC<EditorProps> = ({ slug }) => {
 	const toast = useToast();
 	const router = useRouter();
 	const editorRef = useRef<EditorJS>();
@@ -62,7 +61,7 @@ const Editor: FC<EditorProps> = ({ slug, communityId }) => {
 									formData.append("file", file);
 
 									const res = await uploadFile(formData);
-									
+
 									return {
 										success: res.status,
 										file: {
@@ -122,7 +121,7 @@ const Editor: FC<EditorProps> = ({ slug, communityId }) => {
 			const data = {
 				title: formData.get("title"),
 				content: blocks,
-				communityId,
+				slug,
 			};
 
 			const payload = PostValidator.parse(data);
@@ -140,6 +139,12 @@ const Editor: FC<EditorProps> = ({ slug, communityId }) => {
 			} else if (res.status === 401) {
 				toast({
 					title: "Unauthorized",
+					message: res.message,
+					variant: "warning",
+				});
+			} else if (res.status === 404) {
+				toast({
+					title: "Not Found",
 					message: res.message,
 					variant: "warning",
 				});

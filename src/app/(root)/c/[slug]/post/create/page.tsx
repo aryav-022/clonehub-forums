@@ -1,24 +1,10 @@
+"use client";
+
 import Editor from "@/components/Editor/Editor";
-import { db } from "@/lib/db";
-import { notFound } from "next/navigation";
+import { useParams } from "next/navigation";
 
-interface PageProps {
-	params: {
-		slug: string;
-	};
-}
-
-const Page = async ({ params: { slug } }: PageProps) => {
-	const community = await db.community.findFirst({
-		where: {
-			name: {
-				equals: slug,
-				mode: "insensitive",
-			},
-		},
-	});
-
-	if (!community) return notFound();
+const Page = () => {
+	const { slug } = useParams<{ slug: string }>();
 
 	return (
 		<section className="col-span-4 py-4">
@@ -26,7 +12,7 @@ const Page = async ({ params: { slug } }: PageProps) => {
 				Create Post in <span className="font-medium">c/{slug.toLowerCase()}</span>
 			</h1>
 
-			<Editor slug={slug} communityId={community.id} />
+			<Editor slug={slug} />
 		</section>
 	);
 };

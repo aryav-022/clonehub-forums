@@ -1,9 +1,7 @@
 import CreatePostInput from "@/components/CreatePostInput";
 import DescriptionCard from "@/components/DescriptionCard";
-import Header from "@/components/Header/Header";
-import PostCard from "@/components/PostCard";
 import PostFeed from "@/components/Feed/PostFeed";
-import { POSTS_PER_PAGE } from "@/config";
+import Header from "@/components/Header/Header";
 import { loadPosts } from "@/lib/actions";
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -32,9 +30,9 @@ const Page = async ({ params: { slug } }: PageProps) => {
 
 	const session = await getAuthSession();
 
-	const posts = await loadPosts({
-		where: { communityId: community.id },
-	});
+	const where = { communityId: community.id };
+
+	const posts = await loadPosts({ where });
 
 	return (
 		<div className="col-span-4 space-y-4 py-4">
@@ -43,7 +41,7 @@ const Page = async ({ params: { slug } }: PageProps) => {
 			<div className="grid grid-cols-3 items-start gap-4">
 				<section className="col-span-2 min-h-dvh space-y-4 pb-4">
 					<CreatePostInput slug={slug} session={session} />
-					<PostFeed initialPosts={posts} />
+					<PostFeed initialPosts={posts} where={where} />
 				</section>
 
 				<DescriptionCard

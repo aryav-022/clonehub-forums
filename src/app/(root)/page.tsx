@@ -2,7 +2,6 @@ import DescriptionCard from "@/components/DescriptionCard";
 import CustomFeed from "@/components/Feed/CustomFeed";
 import GeneralFeed from "@/components/Feed/GeneralFeed";
 import { getAuthSession } from "@/lib/auth";
-import { Show } from "@/lib/utils";
 
 interface PageProps {}
 

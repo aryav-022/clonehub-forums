@@ -7,7 +7,7 @@ import { ZodError } from "zod";
 import { db } from "./db";
 import { CommunityValidator } from "./validators/community";
 import { PostCreationRequest } from "./validators/post";
-import { COMMENTS_PER_POST, POSTS_PER_PAGE } from "@/config";
+import { COMMENTS_PER_POST, POSTS_PER_PAGE, SEARCH_RESULTS_LIMIT } from "@/config";
 import { CommentCreationRequest } from "./validators/comment";
 
 export async function createCommunity(formData: FormData): Promise<ActionResponse> {
@@ -95,11 +95,21 @@ export async function createPost(payload: PostCreationRequest): Promise<ActionRe
 			return ActionResponse(401, "You must be logged in to create a post.");
 		}
 
+		const community = await db.community.findFirst({
+			where: {
+				name: payload.slug,
+			},
+		});
+
+		if (!community) {
+			return ActionResponse(404, "Community not found.");
+		}
+
 		const post = await db.post.create({
 			data: {
 				title: payload.title,
 				content: payload.content,
-				communityId: payload.communityId,
+				communityId: community.id,
 				authorId: session.user.id,
 			},
 		});
@@ -193,5 +203,32 @@ export async function loadComments({ postId, replyToId, page = 0 }: LoadComments
 		orderBy: { createdAt: "desc" },
 		skip: page * COMMENTS_PER_POST,
 		take: COMMENTS_PER_POST,
+	});
+}
+
+export async function searchCommunities(query: string) {
+	return await db.community.findMany({
+		where: {
+			name: {
+				contains: query,
+				mode: "insensitive",
+			},
+		},
+		orderBy: [
+			{
+				members: {
+					_count: "desc",
+				},
+			},
+			{
+				posts: {
+					_count: "desc",
+				},
+			},
+			{
+				createdAt: "desc",
+			},
+		],
+		take: SEARCH_RESULTS_LIMIT,
 	});
 }
