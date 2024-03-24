@@ -7,18 +7,33 @@ import { FC, useRef } from "react";
 import VoteCard from "./VoteCard";
 import { ExtendedPost } from "@/types/prisma";
 import EditorOutput from "./Editor/EditorOutput";
+import type { Session } from "next-auth";
 
 interface PostCardProps {
 	post: ExtendedPost;
+	session: Session | null;
 }
 
-const PostCard: FC<PostCardProps> = ({ post }) => {
+const PostCard: FC<PostCardProps> = ({ post, session }) => {
 	const contentRef = useRef<HTMLDivElement | null>(null);
+
+	let currVote: -1 | 0 | 1 = 0;
+
+	const initialVotes = post.votes.reduce((acc, vote) => {
+		if (vote.userId === session?.user.id) {
+			if (vote.type === "UP") currVote = 1;
+			if (vote.type === "DOWN") currVote = -1;
+		}
+
+		if (vote.type === "UP") return acc + 1;
+		if (vote.type === "DOWN") return acc - 1;
+		return acc;
+	}, 0);
 
 	return (
 		<div className="overflow-hidden rounded-lg">
 			<div className="flex max-h-64 gap-4 overflow-hidden bg-neutral-50 px-4 py-4">
-				<VoteCard initialVotes={post._count.votes} />
+				<VoteCard postId={post.id} initialVotes={initialVotes} currVote={currVote} />
 
 				<div className="space-y-2">
 					<div className="text-xs">
@@ -49,7 +64,7 @@ const PostCard: FC<PostCardProps> = ({ post }) => {
 			</div>
 
 			<div className="flex items-center gap-2 bg-zinc-100 px-6 py-3 text-sm">
-				<MessageSquare size={18} /> {post._count.votes} comments
+				<MessageSquare size={18} /> {post._count.comments} comments
 			</div>
 		</div>
 	);

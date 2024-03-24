@@ -2,6 +2,7 @@ import { POSTS_PER_PAGE } from "@/config";
 import { db } from "@/lib/db";
 import type { Session } from "next-auth";
 import PostFeed from "./PostFeed";
+import { loadPosts } from "@/lib/actions";
 
 interface CustomFeedProps {
 	session: Session;
@@ -18,22 +19,9 @@ const CustomFeed = async ({ session }: CustomFeedProps) => {
 		},
 	};
 
-	const posts = await db.post.findMany({
-		where,
-		include: {
-			author: true,
-			community: true,
-			_count: {
-				select: { votes: true, comments: true },
-			},
-		},
-		orderBy: {
-			createdAt: "desc",
-		},
-		take: POSTS_PER_PAGE,
-	});
+	const posts = await loadPosts({ where });
 
-	return <PostFeed initialPosts={posts} where={where} />;
+	return <PostFeed initialPosts={posts} where={where} session={session} />;
 };
 
 export default CustomFeed;

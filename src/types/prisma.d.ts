@@ -1,12 +1,10 @@
-import { Community, Post, User } from "@prisma/client";
+import type { Community, Post, User, Vote } from "@prisma/client";
 
-export type ExtendedPost = Prettify<
-	Post & {
-		author: User;
-		community: Community;
-		_count: {
-			votes: number;
-			comments: number;
-		};
-	}
->;
+export type ExtendedPost = Post & {
+	author: User;
+	community: Community;
+	votes: Vote[];
+	_count: {
+		comments: number;
+	};
+};

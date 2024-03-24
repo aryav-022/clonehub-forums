@@ -41,7 +41,7 @@ const Page = async ({ params: { slug } }: PageProps) => {
 			<div className="grid grid-cols-3 items-start gap-4">
 				<section className="col-span-2 min-h-dvh space-y-4 pb-4">
 					<CreatePostInput slug={slug} session={session} />
-					<PostFeed initialPosts={posts} where={where} />
+					<PostFeed session={session} initialPosts={posts} where={where} />
 				</section>
 
 				<DescriptionCard

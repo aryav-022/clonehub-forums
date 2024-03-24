@@ -9,6 +9,7 @@ import { CommunityValidator } from "./validators/community";
 import { PostCreationRequest } from "./validators/post";
 import { COMMENTS_PER_POST, POSTS_PER_PAGE, SEARCH_RESULTS_LIMIT } from "@/config";
 import { CommentCreationRequest } from "./validators/comment";
+import type { VoteType } from "@prisma/client";
 
 export async function createCommunity(formData: FormData): Promise<ActionResponse> {
 	try {
@@ -124,9 +125,7 @@ export async function createPost(payload: PostCreationRequest): Promise<ActionRe
 }
 
 interface LoadPostsParams {
-	where?: {
-		communityId?: string;
-	};
+	where?: Object;
 	page?: number;
 }
 
@@ -136,8 +135,9 @@ export async function loadPosts({ where, page = 0 }: LoadPostsParams) {
 		include: {
 			author: true,
 			community: true,
+			votes: true,
 			_count: {
-				select: { votes: true, comments: true },
+				select: { comments: true },
 			},
 		},
 		orderBy: {
@@ -234,4 +234,52 @@ export async function searchCommunities(query: string) {
 		],
 		take: SEARCH_RESULTS_LIMIT,
 	});
+}
+
+export async function votePost(id: string, type?: VoteType) {
+	const session = await getAuthSession();
+
+	if (!session) {
+		return ActionResponse(401, "You must be logged in to vote.");
+	}
+
+	const post = await db.post.findUnique({
+		where: { id },
+	});
+
+	if (!post) {
+		return ActionResponse(404, "Post not found.");
+	}
+
+	const existingVote = await db.vote.findUnique({
+		where: {
+			userId_postId: {
+				userId: session.user.id,
+				postId: post.id,
+			},
+		},
+	});
+
+	if (existingVote) {
+		await db.vote.delete({
+			where: {
+				userId_postId: {
+					userId: session.user.id,
+					postId: post.id,
+				},
+			},
+		});
+	}
+
+	if (type) {
+		await db.vote.create({
+			data: {
+				userId: session.user.id,
+				postId: post.id,
+				type,
+			},
+		});
+	}
+
+	return ActionResponse(200, "Vote recorded successfully.");
 }

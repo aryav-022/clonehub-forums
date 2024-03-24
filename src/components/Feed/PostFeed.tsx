@@ -7,44 +7,46 @@ import { useIntersection } from "@mantine/hooks";
 import { loadPosts } from "@/lib/actions";
 import { POSTS_PER_PAGE } from "@/config";
 import { useToast } from "../ui/Toast";
+import type { Session } from "next-auth";
 
 interface PostFeedProps {
 	initialPosts: ExtendedPost[];
 	where?: Object;
+	session: Session | null;
 }
 
-const PostFeed: FC<PostFeedProps> = ({ initialPosts, where }) => {
+const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 	const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts);
 	const toast = useToast();
 
 	const { ref, entry } = useIntersection();
 
-	// useEffect(() => {
-	// 	if (entry?.isIntersecting) {
-	// 		(async () => {
-	// 			const morePosts = await loadPosts({
-	// 				where,
-	// 				page: posts.length / POSTS_PER_PAGE,
-	// 			});
+	useEffect(() => {
+		if (entry?.isIntersecting) {
+			(async () => {
+				const morePosts = await loadPosts({
+					where,
+					page: posts.length / POSTS_PER_PAGE,
+				});
 
-	// 			if (!morePosts || morePosts.length === 0) {
-	// 				entry?.target?.remove();
+				if (!morePosts || morePosts.length === 0) {
+					entry?.target?.remove();
 
-	// 				toast({
-	// 					title: "No more posts",
-	// 					message: "You have reached the end of the feed.",
-	// 				});
-	// 			} else {
-	// 				setPosts((prevPosts) => [...prevPosts, ...morePosts]);
-	// 			}
-	// 		})();
-	// 	}
-	// }, [entry, posts, where]);
+					toast({
+						title: "No more posts",
+						message: "You have reached the end of the feed.",
+					});
+				} else {
+					setPosts((prevPosts) => [...prevPosts, ...morePosts]);
+				}
+			})();
+		}
+	}, [entry, posts, where]);
 
 	return (
 		<>
 			{posts.map((post) => (
-				<PostCard key={post.id} post={post} />
+				<PostCard key={post.id} post={post} session={session} />
 			))}
 
 			<PostPlaceholder ref={ref} />

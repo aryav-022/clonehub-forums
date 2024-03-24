@@ -27,13 +27,12 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 	return (
 		<header className="col-span-4 space-y-4 border-b pb-4">
 			{/* Banner */}
-			<div className="h-56 w-full overflow-hidden rounded-lg bg-neutral-300">
+			<div className="relative h-56 w-full overflow-hidden rounded-lg bg-neutral-300">
 				{community.banner && (
 					<Image
 						src={community.banner}
 						alt="Community Banner"
-						height={224}
-						width={1024}
+						fill
 						className="h-56 w-full rounded-lg"
 					/>
 				)}
@@ -49,7 +48,7 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 								alt="Profile Picture"
 								height={96}
 								width={96}
-								className="h-24 w-24 rounded-full"
+								className="rounded-full"
 							/>
 						)}
 					</div>

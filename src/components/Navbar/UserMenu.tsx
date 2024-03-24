@@ -22,8 +22,14 @@ const UserMenu: FC<UserMenuProps> = ({ user }) => {
 
 	return (
 		<div className="relative flex h-full items-center">
-			<button onClick={toggleMenu} className="aspect-square h-full">
-				<Image src={user.image || ""} alt="profile" fill className="h-full w-full rounded-full" />
+			<button onClick={toggleMenu} className="relative aspect-square h-full">
+				<Image
+					src={user.image || ""}
+					alt="profile"
+					height={60}
+					width={60}
+					className="h-full w-full rounded-full"
+				/>
 			</button>
 
 			<menu

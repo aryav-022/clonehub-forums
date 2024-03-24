@@ -9,9 +9,6 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-
 interface PageProps {
 	params: {
 		id: string;

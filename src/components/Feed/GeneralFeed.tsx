@@ -1,25 +1,12 @@
-import { POSTS_PER_PAGE } from "@/config";
-import { db } from "@/lib/db";
+import { loadPosts } from "@/lib/actions";
 import PostFeed from "./PostFeed";
 
 interface GeneralFeedProps {}
 
 const GeneralFeed = async ({}: GeneralFeedProps) => {
-	const posts = await db.post.findMany({
-		include: {
-			author: true,
-			community: true,
-			_count: {
-				select: { votes: true, comments: true },
-			},
-		},
-		orderBy: {
-			createdAt: "desc",
-		},
-		take: POSTS_PER_PAGE,
-	});
+	const posts = await loadPosts({});
 
-	return <PostFeed initialPosts={posts} />;
+	return <PostFeed initialPosts={posts} session={null} />;
 };
 
 export default GeneralFeed;
