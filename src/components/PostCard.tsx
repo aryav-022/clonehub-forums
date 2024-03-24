@@ -13,14 +13,11 @@ interface PostCardProps {
 }
 
 const PostCard: FC<PostCardProps> = ({ post }) => {
-	const cardRef = useRef<HTMLDivElement | null>(null);
+	const contentRef = useRef<HTMLDivElement | null>(null);
 
 	return (
 		<div className="overflow-hidden rounded-lg">
-			<div
-				ref={cardRef}
-				className="relative flex max-h-64 gap-4 overflow-hidden bg-neutral-50 px-4 py-4"
-			>
+			<div className="flex max-h-64 gap-4 overflow-hidden bg-neutral-50 px-4 py-4">
 				<VoteCard initialVotes={post._count.votes} />
 
 				<div className="space-y-2">
@@ -40,14 +37,15 @@ const PostCard: FC<PostCardProps> = ({ post }) => {
 						<h1 className="text-xl font-semibold">{post.title}</h1>
 					</Link>
 
-					<div className="relative max-h-40 w-full overflow-clip text-sm">
+					<div ref={contentRef} className="relative max-h-40 w-full overflow-clip text-sm">
 						<EditorOutput content={post.content} />
+
+						{contentRef.current?.clientHeight === 160 && (
+							// blur bottom if content is too long
+							<div className="absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent" />
+						)}
 					</div>
 				</div>
-
-				{cardRef.current && cardRef.current?.scrollHeight > cardRef.current?.clientHeight && (
-					<div className="absolute bottom-0 left-0 right-0 z-10 h-40 bg-gradient-to-t from-neutral-50 to-transparent"></div>
-				)}
 			</div>
 
 			<div className="flex items-center gap-2 bg-zinc-100 px-6 py-3 text-sm">
