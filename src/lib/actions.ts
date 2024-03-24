@@ -197,11 +197,7 @@ export async function loadComments({ postId, replyToId, page = 0 }: LoadComments
 		},
 		include: {
 			author: true,
-			_count: {
-				select: {
-					commentVotes: true,
-				},
-			},
+			commentVotes: true,
 		},
 		orderBy: { createdAt: "desc" },
 		skip: page * COMMENTS_PER_POST,
@@ -276,6 +272,54 @@ export async function votePost(id: string, type?: VoteType) {
 			data: {
 				userId: session.user.id,
 				postId: post.id,
+				type,
+			},
+		});
+	}
+
+	return ActionResponse(200, "Vote recorded successfully.");
+}
+
+export async function voteComment(id: string, type?: VoteType) {
+	const session = await getAuthSession();
+
+	if (!session) {
+		return ActionResponse(401, "You must be logged in to vote.");
+	}
+
+	const comment = await db.comment.findUnique({
+		where: { id },
+	});
+
+	if (!comment) {
+		return ActionResponse(404, "Comment not found.");
+	}
+
+	const existingVote = await db.commentVote.findUnique({
+		where: {
+			userId_commentId: {
+				userId: session.user.id,
+				commentId: comment.id,
+			},
+		},
+	});
+
+	if (existingVote) {
+		await db.commentVote.delete({
+			where: {
+				userId_commentId: {
+					userId: session.user.id,
+					commentId: comment.id,
+				},
+			},
+		});
+	}
+
+	if (type) {
+		await db.commentVote.create({
+			data: {
+				userId: session.user.id,
+				commentId: comment.id,
 				type,
 			},
 		});

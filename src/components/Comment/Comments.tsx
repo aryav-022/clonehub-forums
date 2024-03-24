@@ -1,24 +1,23 @@
 "use client";
 
 import { COMMENTS_PER_POST } from "@/config";
-import { loadComments } from "@/lib/actions";
-import { Show, timeFromNow } from "@/lib/utils";
+import { loadComments, voteComment } from "@/lib/actions";
+import { type ActionResponse, Show, cn, timeFromNow } from "@/lib/utils";
 import { useIntersection } from "@mantine/hooks";
-import type { Comment, User } from "@prisma/client";
+import type { Comment, CommentVote, User } from "@prisma/client";
 import { ArrowBigDown, ArrowBigUp, MessageSquare } from "lucide-react";
 import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState, type FC } from "react";
+import React, { useEffect, useState, type FC, useOptimistic, useMemo } from "react";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import CommentForm from "./CommentForm";
+import VoteCard from "../VoteCard";
 
 export type ExtendedComments = Comment & {
 	author: User;
-	_count: {
-		commentVotes: number;
-	};
+	commentVotes: CommentVote[];
 };
 
 interface CommentsProps {
@@ -81,6 +80,19 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 		setReplies((prev) => [reply, ...prev]);
 	}
 
+	let currVote: -1 | 0 | 1 = 0;
+
+	const initialVotes = comment.commentVotes.reduce((acc, vote) => {
+		if (vote.userId === session?.user.id) {
+			if (vote.type === "UP") currVote = 1;
+			if (vote.type === "DOWN") currVote = -1;
+		}
+
+		if (vote.type === "UP") return acc + 1;
+		else if (vote.type === "DOWN") return acc - 1;
+		return acc;
+	}, 0);
+
 	return (
 		<li>
 			<div className="flex items-start gap-2">
@@ -103,13 +115,7 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 			</div>
 
 			<div className="flex items-center gap-4">
-				<Button variant="ghost" className="p-2">
-					<ArrowBigUp size={18} />
-				</Button>
-				<small>{comment._count.commentVotes}</small>
-				<Button variant="ghost" className="p-2">
-					<ArrowBigDown size={18} />
-				</Button>
+				<VoteCard horizontal id={comment.id} currVote={currVote} initialVotes={initialVotes} />
 
 				<Button
 					variant="ghost"

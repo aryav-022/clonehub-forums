@@ -24,10 +24,10 @@ const Page = async ({ params: { id } }: PageProps) => {
 					name: true,
 				},
 			},
+			votes: true,
 			_count: {
 				select: {
 					comments: true,
-					votes: true,
 				},
 			},
 		},
@@ -35,9 +35,22 @@ const Page = async ({ params: { id } }: PageProps) => {
 
 	if (!post) return notFound();
 
-	const comments = await loadComments({ postId: id });
-
 	const session = await getAuthSession();
+
+	let currVote: -1 | 0 | 1 = 0;
+
+	const initialVotes = post.votes.reduce((acc, vote) => {
+		if (vote.userId === session?.user.id) {
+			if (vote.type === "UP") currVote = 1;
+			if (vote.type === "DOWN") currVote = -1;
+		}
+
+		if (vote.type === "UP") return acc + 1;
+		if (vote.type === "DOWN") return acc - 1;
+		return acc;
+	}, 0);
+
+	const comments = await loadComments({ postId: id });
 
 	return (
 		<div className="col-span-3 my-4 space-y-4">
@@ -47,7 +60,7 @@ const Page = async ({ params: { id } }: PageProps) => {
 
 			<main className="space-y-8 rounded-lg bg-neutral-50 p-4">
 				<section className="flex gap-4">
-					<VoteCard initialVotes={post._count.votes} />
+					<VoteCard id={post.id} currVote={currVote} initialVotes={initialVotes} />
 
 					<div className="space-y-4">
 						<h1 className="text-3xl font-medium">{post.title}</h1>

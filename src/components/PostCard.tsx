@@ -33,7 +33,7 @@ const PostCard: FC<PostCardProps> = ({ post, session }) => {
 	return (
 		<div className="overflow-hidden rounded-lg">
 			<div className="flex max-h-64 gap-4 overflow-hidden bg-neutral-50 px-4 py-4">
-				<VoteCard postId={post.id} initialVotes={initialVotes} currVote={currVote} />
+				<VoteCard id={post.id} initialVotes={initialVotes} currVote={currVote} />
 
 				<div className="space-y-2">
 					<div className="text-xs">
