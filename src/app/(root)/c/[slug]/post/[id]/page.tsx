@@ -1,24 +1,24 @@
-import CommentForm from "@/components/Comment/CommentForm";
 import CommentSection from "@/components/Comment/CommentSection";
-import Comments from "@/components/Comment/Comments";
 import EditorOutput from "@/components/Editor/EditorOutput";
 import VoteCard from "@/components/VoteCard";
 import { buttonVariants } from "@/components/ui/Button";
 import { loadComments } from "@/lib/actions";
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ChevronLeft, MessageSquare } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 interface PageProps {
 	params: {
-		slug: string;
 		id: string;
 	};
 }
 
-const Page = async ({ params: { slug, id } }: PageProps) => {
+const Page = async ({ params: { id } }: PageProps) => {
 	const post = await db.post.findUnique({
 		where: { id },
 		include: {
@@ -48,7 +48,7 @@ const Page = async ({ params: { slug, id } }: PageProps) => {
 				<ChevronLeft /> Back Community
 			</Link>
 
-			<main className="rounded-lg bg-neutral-50 p-4">
+			<main className="space-y-8 rounded-lg bg-neutral-50 p-4">
 				<section className="flex gap-4">
 					<VoteCard initialVotes={post._count.votes} />
 

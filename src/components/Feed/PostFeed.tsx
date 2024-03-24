@@ -6,6 +6,7 @@ import PostCard from "../PostCard";
 import { useIntersection } from "@mantine/hooks";
 import { loadPosts } from "@/lib/actions";
 import { POSTS_PER_PAGE } from "@/config";
+import { useToast } from "../ui/Toast";
 
 interface PostFeedProps {
 	initialPosts: ExtendedPost[];
@@ -14,25 +15,31 @@ interface PostFeedProps {
 
 const PostFeed: FC<PostFeedProps> = ({ initialPosts, where }) => {
 	const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts);
+	const toast = useToast();
 
 	const { ref, entry } = useIntersection();
 
-	useEffect(() => {
-		if (entry?.isIntersecting) {
-			(async () => {
-				const morePosts = await loadPosts({
-					where,
-					page: posts.length / POSTS_PER_PAGE,
-				});
+	// useEffect(() => {
+	// 	if (entry?.isIntersecting) {
+	// 		(async () => {
+	// 			const morePosts = await loadPosts({
+	// 				where,
+	// 				page: posts.length / POSTS_PER_PAGE,
+	// 			});
 
-				if (!morePosts || morePosts.length === 0) {
-					entry.target.remove();
-				} else {
-					setPosts((prevPosts) => [...prevPosts, ...morePosts]);
-				}
-			})();
-		}
-	}, [entry, posts, where]);
+	// 			if (!morePosts || morePosts.length === 0) {
+	// 				entry?.target?.remove();
+
+	// 				toast({
+	// 					title: "No more posts",
+	// 					message: "You have reached the end of the feed.",
+	// 				});
+	// 			} else {
+	// 				setPosts((prevPosts) => [...prevPosts, ...morePosts]);
+	// 			}
+	// 		})();
+	// 	}
+	// }, [entry, posts, where]);
 
 	return (
 		<>
@@ -44,6 +51,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where }) => {
 		</>
 	);
 };
+PostFeed.displayName = "PostFeed";
 
 const PostPlaceholder = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
 	(props, ref) => {

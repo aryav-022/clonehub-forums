@@ -97,7 +97,10 @@ export async function createPost(payload: PostCreationRequest): Promise<ActionRe
 
 		const community = await db.community.findFirst({
 			where: {
-				name: payload.slug,
+				name: {
+					equals: payload.slug,
+					mode: "insensitive",
+				},
 			},
 		});
 

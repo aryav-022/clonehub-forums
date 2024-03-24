@@ -11,6 +11,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import { ZodError } from "zod";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
+import "@/styles/editor.css";
 
 interface EditorProps {
 	slug: string;
@@ -190,7 +191,7 @@ const Editor: FC<EditorProps> = ({ slug }) => {
 					/>
 				</div>
 
-				<div id="editor"></div>
+				<div id="editor" className="prose relative z-0"></div>
 
 				<SubmitButton />
 			</form>

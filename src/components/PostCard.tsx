@@ -40,7 +40,9 @@ const PostCard: FC<PostCardProps> = ({ post }) => {
 						<h1 className="text-xl font-semibold">{post.title}</h1>
 					</Link>
 
-					<EditorOutput content={post.content} />
+					<div className="relative max-h-40 w-full overflow-clip text-sm">
+						<EditorOutput content={post.content} />
+					</div>
 				</div>
 
 				{cardRef.current && cardRef.current?.scrollHeight > cardRef.current?.clientHeight && (
