@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
-import { ActionResponse, Prettify } from "@/lib/utils";
+import { ActionResponse, Prettify, cn } from "@/lib/utils";
 import { Community, Post, User } from "@prisma/client";
 import type { Session } from "next-auth";
 import { FC } from "react";
 import Paragraph from "./Paragraph";
-import { JoinCommunityForm, LeaveCommunityForm } from "./Forms";
+import { JoinCommunityForm, LeaveCommunityForm } from "../Forms";
 import Link from "next/link";
 import { buttonVariants } from "../ui/Button";
 import Image from "next/image";
@@ -76,17 +76,19 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 					</div>
 
 					{/* Controlls */}
-					<Controllers community={community} session={session} />
+					<div className="w-fit">
+						<Controllers community={community} session={session} />
+					</div>
 				</div>
 			</div>
 		</header>
 	);
 };
 
-async function Controllers({ community, session }: HeaderProps) {
+export async function Controllers({ community, session }: HeaderProps) {
 	if (!session) {
 		return (
-			<Link href="/signin" className={buttonVariants({ size: "lg" })}>
+			<Link href="/signin" className={cn(buttonVariants({ size: "lg", className: "w-full" }))}>
 				Signin to join community
 			</Link>
 		);
@@ -94,89 +96,13 @@ async function Controllers({ community, session }: HeaderProps) {
 
 	if (session.user.id === community.creatorId) {
 		return (
-			<Link href={`/c/${community.name}/dashboard`} className={buttonVariants({ size: "lg" })}>
+			<Link
+				href={`/c/${community.name}/dashboard`}
+				className={cn(buttonVariants({ size: "lg", className: "w-full" }))}
+			>
 				Community Dashboard
 			</Link>
 		);
-	}
-
-	async function joinCommunity() {
-		"use server";
-
-		try {
-			// Check if user is logged in
-			if (!session) {
-				return ActionResponse(401, "You must be logged in to join a community.");
-			}
-
-			// Check if user is already a member
-			const isMember = await db.community.findFirst({
-				where: {
-					id: community.id,
-					members: { some: { id: session.user.id } },
-				},
-			});
-
-			if (isMember) {
-				return ActionResponse(400, "You are already a member of this community.");
-			}
-
-			// Add user to community
-			await db.community.update({
-				where: { id: community.id },
-				data: {
-					members: {
-						connect: { id: session.user.id },
-					},
-				},
-			});
-
-			return ActionResponse(200, "You have successfully joined the community.");
-		} catch (error) {
-			return ActionResponse(500, "An error occurred while joining the community.");
-		}
-	}
-
-	async function leaveCommunity() {
-		"use server";
-
-		try {
-			// Check if user is logged in
-			if (!session) {
-				return ActionResponse(401, "You must be logged in to leave a community.");
-			}
-
-			// check if user is the creator
-			if (session.user.id === community.creatorId) {
-				return ActionResponse(403, "You cannot leave the community as the creator.");
-			}
-
-			// Check if user is a member
-			const isMember = await db.community.findFirst({
-				where: {
-					id: community.id,
-					members: { some: { id: session.user.id } },
-				},
-			});
-
-			if (!isMember) {
-				return ActionResponse(400, "You are not a member of this community.");
-			}
-
-			// Remove user from community
-			await db.community.update({
-				where: { id: community.id },
-				data: {
-					members: {
-						disconnect: { id: session.user.id },
-					},
-				},
-			});
-
-			return ActionResponse(200, "You have successfully left the community.");
-		} catch (error) {
-			return ActionResponse(500, "An error occurred while leaving the community.");
-		}
 	}
 
 	const isMember = await db.community.findFirst({
@@ -187,10 +113,10 @@ async function Controllers({ community, session }: HeaderProps) {
 	});
 
 	if (isMember) {
-		return <LeaveCommunityForm leaveCommunity={leaveCommunity} />;
+		return <LeaveCommunityForm id={community.id} />;
 	}
 
-	return <JoinCommunityForm joinCommunity={joinCommunity} />;
+	return <JoinCommunityForm id={community.id} />;
 }
 
 export default Header;

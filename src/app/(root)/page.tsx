@@ -15,7 +15,7 @@ const Page = async ({}: PageProps) => {
 					{session ? <CustomFeed session={session} /> : <GeneralFeed />}
 				</section>
 
-				<DescriptionCard title={"Home"} description={"nhi he"} session={session} />
+				<DescriptionCard session={session} />
 			</div>
 		</div>
 	);

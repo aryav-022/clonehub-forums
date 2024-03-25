@@ -1,77 +1,79 @@
+import { Show, cn } from "@/lib/utils";
+import type { Community } from "@prisma/client";
+import type { Session } from "next-auth";
 import Link from "next/link";
 import { FC } from "react";
-import { Button, buttonVariants } from "./ui/Button";
-import type { Session } from "next-auth";
+import { Controllers } from "./Header/Header";
+import { buttonVariants } from "./ui/Button";
+
+type ExtendedCommunity = Community & {
+	_count: {
+		members: number;
+		posts: number;
+	};
+};
 
 interface DescriptionCardProps {
-	title: string;
-	description: string;
-	showIcon?: Boolean;
-	session?: Session | null;
-	members?: number;
-	posts?: number;
-	createdAt?: Date;
-	creatorId?: string;
+	session: Session | null;
+	community?: ExtendedCommunity;
 }
 
-const DescriptionCard: FC<DescriptionCardProps> = ({
-	title,
-	description,
-	showIcon,
-	session,
-	members,
-	posts,
-	createdAt,
-	creatorId,
-}) => {
+const DescriptionCard: FC<DescriptionCardProps> = ({ session, community }) => {
 	return (
-		<div className="scrollbar-thin sticky top-16 overflow-auto rounded-xl bg-neutral-100">
-			<h1 className="px-6 py-8 font-medium">{title}</h1>
+		<div className="scrollbar-thin sticky top-16 space-y-6 overflow-auto rounded-xl bg-neutral-100 px-6 py-8">
+			{community ? (
+				<>
+					<h1 className="font-medium">c/{community.name}</h1>
 
-			<div className="space-y-3 px-4 pb-6 pt-4">
-				<p className="text-sm text-gray-600">{description}</p>
+					<div className="space-y-3">
+						<p className="text-balance text-sm text-gray-600">{community!.description}</p>
 
-				<dl>
-					{members !== undefined && (
-						<div>
-							<dt>Members</dt>
-							<dd>{members}</dd>
+						<dl className="divide-y">
+							<div className="flex w-full justify-between gap-2 py-2 text-sm">
+								<dt>Members</dt>
+								<dd>{community!._count.members}</dd>
+							</div>
+
+							<div className="flex w-full justify-between gap-2 py-2 text-sm">
+								<dt>Posts</dt>
+								<dd>{community!._count.posts}</dd>
+							</div>
+
+							<div className="flex w-full justify-between gap-2 py-2 text-sm">
+								<dt>Created</dt>
+								<dd>{new Date(community!.createdAt).toDateString()}</dd>
+							</div>
+						</dl>
+
+						<div className="space-y-2 pt-2">
+							<Controllers session={session} community={community!} />
+
+							<Show If={!!session}>
+								<Link
+									href={`/c/${community!.name}/post/create`}
+									className={cn(buttonVariants({ className: "w-full" }))}
+								>
+									Create Post
+								</Link>
+							</Show>
 						</div>
-					)}
+					</div>
+				</>
+			) : (
+				<>
+					<h1 className="font-medium">Welcome to CloneHub Forums.</h1>
 
-					{createdAt !== undefined && (
-						<div>
-							<dt>Created</dt>
-							<dd>{new Date(createdAt).toDateString()}</dd>
-						</div>
-					)}
+					<p className="text-balance text-sm text-gray-600">
+						Welcome to the home page of CloneHub Forums. Here you can find the latest discussions,
+						posts, and updates from the community. Join the conversation and share your thoughts
+						with other members. Start exploring now!
+					</p>
 
-					{posts !== undefined && (
-						<div>
-							<dt>Posts</dt>
-							<dd>{posts}</dd>
-						</div>
-					)}
-				</dl>
-
-				{!!session ? (
-					creatorId !== undefined ? (
-						creatorId === session?.user.id ? (
-							<p>You created this community.</p>
-						) : (
-							<Button>Leave Community</Button>
-						)
-					) : (
-						<Link href="/c/create" className={buttonVariants({ className: "w-full" })}>
-							Create Community
-						</Link>
-					)
-				) : (
-					<Link href="/signin" className={buttonVariants({ className: "w-full" })}>
-						Signin to create community
+					<Link href="/c/create" className={buttonVariants({ className: "w-full" })}>
+						Create Community
 					</Link>
-				)}
-			</div>
+				</>
+			)}
 		</div>
 	);
 };

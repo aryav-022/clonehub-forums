@@ -44,10 +44,7 @@ const Page = async ({ params: { slug } }: PageProps) => {
 					<PostFeed session={session} initialPosts={posts} where={where} />
 				</section>
 
-				<DescriptionCard
-					title={`c/${slug}`}
-					description="Welcome to the CloneHub Forums! This is a community-driven forum app where users can engage in discussions, share content, and vote on posts and comments. Join CloneHub's forum to connect with like-minded individuals and explore a wide range of topics."
-				/>
+				<DescriptionCard session={session} community={community} />
 			</div>
 		</div>
 	);

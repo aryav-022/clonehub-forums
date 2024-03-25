@@ -233,31 +233,22 @@ export async function searchCommunities(query: string) {
 }
 
 export async function votePost(id: string, type?: VoteType) {
-	const session = await getAuthSession();
+	try {
+		const session = await getAuthSession();
 
-	if (!session) {
-		return ActionResponse(401, "You must be logged in to vote.");
-	}
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to vote.");
+		}
 
-	const post = await db.post.findUnique({
-		where: { id },
-	});
+		const post = await db.post.findUnique({
+			where: { id },
+		});
 
-	if (!post) {
-		return ActionResponse(404, "Post not found.");
-	}
+		if (!post) {
+			return ActionResponse(404, "Post not found.");
+		}
 
-	const existingVote = await db.vote.findUnique({
-		where: {
-			userId_postId: {
-				userId: session.user.id,
-				postId: post.id,
-			},
-		},
-	});
-
-	if (existingVote) {
-		await db.vote.delete({
+		const existingVote = await db.vote.findUnique({
 			where: {
 				userId_postId: {
 					userId: session.user.id,
@@ -265,47 +256,51 @@ export async function votePost(id: string, type?: VoteType) {
 				},
 			},
 		});
-	}
 
-	if (type) {
-		await db.vote.create({
-			data: {
-				userId: session.user.id,
-				postId: post.id,
-				type,
-			},
-		});
-	}
+		if (existingVote) {
+			await db.vote.delete({
+				where: {
+					userId_postId: {
+						userId: session.user.id,
+						postId: post.id,
+					},
+				},
+			});
+		}
 
-	return ActionResponse(200, "Vote recorded successfully.");
+		if (type) {
+			await db.vote.create({
+				data: {
+					userId: session.user.id,
+					postId: post.id,
+					type,
+				},
+			});
+		}
+
+		return ActionResponse(200, "Vote recorded successfully.");
+	} catch (error) {
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
 }
 
 export async function voteComment(id: string, type?: VoteType) {
-	const session = await getAuthSession();
+	try {
+		const session = await getAuthSession();
 
-	if (!session) {
-		return ActionResponse(401, "You must be logged in to vote.");
-	}
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to vote.");
+		}
 
-	const comment = await db.comment.findUnique({
-		where: { id },
-	});
+		const comment = await db.comment.findUnique({
+			where: { id },
+		});
 
-	if (!comment) {
-		return ActionResponse(404, "Comment not found.");
-	}
+		if (!comment) {
+			return ActionResponse(404, "Comment not found.");
+		}
 
-	const existingVote = await db.commentVote.findUnique({
-		where: {
-			userId_commentId: {
-				userId: session.user.id,
-				commentId: comment.id,
-			},
-		},
-	});
-
-	if (existingVote) {
-		await db.commentVote.delete({
+		const existingVote = await db.commentVote.findUnique({
 			where: {
 				userId_commentId: {
 					userId: session.user.id,
@@ -313,17 +308,114 @@ export async function voteComment(id: string, type?: VoteType) {
 				},
 			},
 		});
-	}
 
-	if (type) {
-		await db.commentVote.create({
-			data: {
-				userId: session.user.id,
-				commentId: comment.id,
-				type,
+		if (existingVote) {
+			await db.commentVote.delete({
+				where: {
+					userId_commentId: {
+						userId: session.user.id,
+						commentId: comment.id,
+					},
+				},
+			});
+		}
+
+		if (type) {
+			await db.commentVote.create({
+				data: {
+					userId: session.user.id,
+					commentId: comment.id,
+					type,
+				},
+			});
+		}
+
+		return ActionResponse(200, "Vote recorded successfully.");
+	} catch (error) {
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
+}
+
+export async function joinCommunity(id: string) {
+	try {
+		const session = await getAuthSession();
+
+		// Check if user is logged in
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to join a community.");
+		}
+
+		// Check if user is already a member
+		const isMember = await db.community.findFirst({
+			where: {
+				id,
+				members: { some: { id: session.user.id } },
 			},
 		});
-	}
 
-	return ActionResponse(200, "Vote recorded successfully.");
+		if (isMember) {
+			return ActionResponse(400, "You are already a member of this community.");
+		}
+
+		// Add user to community
+		await db.community.update({
+			where: { id },
+			data: {
+				members: {
+					connect: { id: session.user.id },
+				},
+			},
+		});
+
+		return ActionResponse(200, "You have successfully joined the community.");
+	} catch (error) {
+		return ActionResponse(500, "An error occurred while joining the community.");
+	}
+}
+
+export async function leaveCommunity(id: string) {
+	try {
+		const session = await getAuthSession();
+
+		// Check if user is logged in
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to leave a community.");
+		}
+
+		// Get community
+		const community = await db.community.findFirst({
+			where: {
+				id,
+				members: {
+					some: {
+						id: session.user.id,
+					},
+				},
+			},
+		});
+
+		// Check if community exists
+		if (!community) {
+			return ActionResponse(404, "Community not found, or you are not a member.");
+		}
+
+		// check if user is the creator
+		if (session.user.id === community.creatorId) {
+			return ActionResponse(403, "You cannot leave the community as the creator.");
+		}
+
+		// Remove user from community
+		await db.community.update({
+			where: { id: community.id },
+			data: {
+				members: {
+					disconnect: { id: session.user.id },
+				},
+			},
+		});
+
+		return ActionResponse(200, "You have successfully left the community.");
+	} catch (error) {
+		return ActionResponse(500, "An error occurred while leaving the community.");
+	}
 }

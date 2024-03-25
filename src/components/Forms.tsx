@@ -1,21 +1,17 @@
 "use client";
 
-import type { ActionResponse } from "@/lib/utils";
-import { useFormStatus } from "react-dom";
-import { Button } from "../ui/Button";
-import { useToast } from "../ui/Toast";
+import { joinCommunity, leaveCommunity } from "@/lib/actions";
 import { useRouter } from "next/navigation";
+import { useFormStatus } from "react-dom";
+import { Button } from "./ui/Button";
+import { useToast } from "./ui/Toast";
 
-export function JoinCommunityForm({
-	joinCommunity,
-}: {
-	joinCommunity: () => Promise<ActionResponse>;
-}) {
+export function JoinCommunityForm({ id }: { id: string }) {
 	const router = useRouter();
 	const toast = useToast();
 
 	async function join() {
-		const res = await joinCommunity();
+		const res = await joinCommunity(id);
 
 		if (res.status === 200) {
 			toast({ title: "Success.", message: res.message, variant: "success" });
@@ -36,22 +32,18 @@ export function JoinCommunityForm({
 	);
 }
 
-export function LeaveCommunityForm({
-	leaveCommunity,
-}: {
-	leaveCommunity: () => Promise<ActionResponse>;
-}) {
+export function LeaveCommunityForm({ id }: { id: string }) {
 	const router = useRouter();
 	const toast = useToast();
 
 	async function leave() {
-		const res = await leaveCommunity();
+		const res = await leaveCommunity(id);
 
 		if (res.status === 200) {
 			toast({ title: "Success", message: res.message, variant: "success" });
 			router.refresh();
-		} else if (res.status === 400) {
-			toast({ title: "Requirement already satisfied", message: res.message, variant: "warning" });
+		} else if (res.status === 404) {
+			toast({ title: "Not Found", message: res.message, variant: "warning" });
 		} else if (res.status === 401) {
 			toast({ title: "Unauthorized", message: res.message, variant: "warning" });
 		} else if (res.status === 403) {
@@ -72,7 +64,7 @@ function SubmitButton({ children }: { children?: React.ReactNode }) {
 	const { pending } = useFormStatus();
 
 	return (
-		<Button size="lg" type="submit" aria-disabled={pending} isLoading={pending}>
+		<Button size="lg" type="submit" className="w-full" aria-disabled={pending} isLoading={pending}>
 			{children}
 		</Button>
 	);

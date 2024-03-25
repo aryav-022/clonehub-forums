@@ -32,7 +32,7 @@ export const ActionResponse = (status: number, message: string, data?: any) => (
 });
 export type ActionResponse = ReturnType<typeof ActionResponse>;
 
-export function Show({ children, If, Else }: { children: React.ReactNode; If?: any; Else?: any }) {
+export function Show({ children, If, Else }: { children: React.ReactNode; If?: Boolean; Else?: Boolean }) {
 	if (If !== undefined) return If ? children : null;
 	else if (Else !== undefined) return Else ? null : children;
 	else return children;

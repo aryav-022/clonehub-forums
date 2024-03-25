@@ -97,7 +97,7 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 		<li>
 			<div className="flex items-start gap-2">
 				<div className="h-8 w-8 overflow-hidden rounded-full bg-neutral-800">
-					<Show If={comment.author.image}>
+					<Show If={!!comment.author.image}>
 						<Image src={comment.author.image!} alt="profile picture" height={36} width={36} />
 					</Show>
 				</div>
