@@ -9,6 +9,7 @@ import { type CommentCreationRequest, CommentValidator } from "@/lib/validators/
 import type { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import type { ExtendedComments } from "./Comments";
+import { useRef } from "react";
 
 interface CommentFormProps {
 	session: Session | null;
@@ -27,6 +28,8 @@ export default function CommentForm({
 }: CommentFormProps) {
 	const toast = useToast();
 	const router = useRouter();
+
+	const formRef = useRef<HTMLFormElement | null>(null);
 
 	async function handleSubmit(formData: FormData) {
 		if (!session) {
@@ -79,11 +82,13 @@ export default function CommentForm({
 				message: "An unexpected error occurred. Please try again later.",
 				variant: "error",
 			});
+		} finally {
+			formRef.current?.reset();
 		}
 	}
 
 	return (
-		<form action={handleSubmit}>
+		<form ref={formRef} action={handleSubmit}>
 			<textarea
 				name="comment"
 				id="comment"
