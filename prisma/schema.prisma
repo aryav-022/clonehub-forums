@@ -73,7 +73,7 @@ model Community {
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
-    creator   User   @relation("CreatedCommunities", fields: [creatorId], references: [id])
+    creator   User   @relation("CreatedCommunities", fields: [creatorId], references: [id], onDelete: Cascade)
     creatorId String
 
     members User[] @relation("JoinedCommunities")
@@ -91,7 +91,7 @@ model Post {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    author   User   @relation(fields: [authorId], references: [id])
+    author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
     authorId String
 
     community   Community @relation(fields: [communityId], references: [id])
@@ -110,7 +110,7 @@ enum VoteType {
 model Vote {
     type VoteType
 
-    user   User   @relation(fields: [userId], references: [id])
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId String
 
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -124,7 +124,7 @@ model Comment {
     content   String
     createdAt DateTime @default(now())
 
-    author   User   @relation(fields: [authorId], references: [id])
+    author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
     authorId String
 
     post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -138,7 +138,7 @@ model Comment {
 }
 
 model CommentVote {
-    user   User   @relation(fields: [userId], references: [id])
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId String
 
     comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)

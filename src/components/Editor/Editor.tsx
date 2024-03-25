@@ -191,7 +191,7 @@ const Editor: FC<EditorProps> = ({ slug }) => {
 					/>
 				</div>
 
-				<div id="editor" className="prose relative z-0"></div>
+				<div id="editor" className="prose relative z-0 min-h-80"></div>
 
 				<SubmitButton />
 			</form>

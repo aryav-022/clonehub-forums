@@ -7,7 +7,7 @@ interface pageProps {
 }
 
 const Page: FC<pageProps> = ({ params: { topic } }) => {
-	return <h1>{topic}</h1>;
+	return <h1>{topic} Comming Soon</h1>;
 };
 
 export default Page;

@@ -6,16 +6,16 @@ export async function GET(req: Request) {
 		return new Response("Invalid href", { status: 400 });
 	}
 
-	const res = await fetch(href).then((res) => res.json());
+	const res = await fetch(href).then((res) => res.text());
 
 	// Parse the HTML using regular expressions
-	const titleMatch = res.data.match(/<title>(.*?)<\/title>/);
+	const titleMatch = res.match(/<title>(.*?)<\/title>/);
 	const title = titleMatch ? titleMatch[1] : "";
 
-	const descriptionMatch = res.data.match(/<meta name="description" content="(.*?)"/);
+	const descriptionMatch = res.match(/<meta name="description" content="(.*?)"/);
 	const description = descriptionMatch ? descriptionMatch[1] : "";
 
-	const imageMatch = res.data.match(/<meta property="og:image" content="(.*?)"/);
+	const imageMatch = res.match(/<meta property="og:image" content="(.*?)"/);
 	const imageUrl = imageMatch ? imageMatch[1] : "";
 
 	// Return the data in the format required by the editor tool

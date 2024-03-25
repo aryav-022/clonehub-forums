@@ -43,7 +43,7 @@ const UserMenu: FC<UserMenuProps> = ({ user }) => {
 				<li>
 					<div className="py-2">
 						<Link
-							href={`/user/${user.username}`}
+							href={`/u/${user.username}`}
 							className={cn(
 								buttonVariants({
 									variant: "ghost",

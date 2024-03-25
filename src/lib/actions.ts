@@ -14,6 +14,7 @@ import type { VoteType } from "@prisma/client";
 export async function createCommunity(formData: FormData): Promise<ActionResponse> {
 	try {
 		const data = Object.fromEntries(formData);
+
 		const { communityName, description, image, banner } = CommunityValidator.parse(data);
 
 		const session = await getAuthSession();
@@ -417,5 +418,103 @@ export async function leaveCommunity(id: string) {
 		return ActionResponse(200, "You have successfully left the community.");
 	} catch (error) {
 		return ActionResponse(500, "An error occurred while leaving the community.");
+	}
+}
+
+export async function updateProfilePicture(formData: FormData) {
+	try {
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to update your profile picture.");
+		}
+
+		const ALLOWED_IMAGE_TYPES = [
+			"image/jpeg",
+			"image/png",
+			"image/webp",
+			"image/jgp",
+			"image/svg",
+			"image/gif",
+			"image/svg+xml",
+		];
+
+		const image = formData.get("file") as File;
+
+		if (image.size <= 0 || !ALLOWED_IMAGE_TYPES.includes(image.type)) {
+			return ActionResponse(400, "Invalid image type or size.");
+		}
+
+		const { url, status } = await uploadFile(formData);
+
+		if (status === 0) {
+			return ActionResponse(500, "An error occurred while uploading the image.");
+		}
+
+		await db.user.update({
+			where: { id: session.user.id },
+			data: {
+				image: url,
+			},
+		});
+
+		return ActionResponse(200, "Profile picture updated successfully.", { url });
+	} catch (error) {
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
+}
+
+export async function updateUsername(formData: FormData) {
+	try {
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to update your username.");
+		}
+
+		const username = formData.get("username") as string;
+
+		if (session.user.username === username) {
+			return ActionResponse(400, "Username is the same as the current one.");
+		}
+
+		const existingUser = await db.user.findFirst({
+			where: { username },
+		});
+
+		if (existingUser) {
+			return ActionResponse(409, "Username is already taken.");
+		}
+
+		await db.user.update({
+			where: { id: session.user.id },
+			data: { username },
+		});
+
+		return ActionResponse(200, "Username updated successfully.");
+	} catch (error) {
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
+}
+
+export async function deleteAccount() {
+	try {
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to delete your account.");
+		}
+
+		await db.user.delete({
+			where: {
+				id: session.user.id,
+			},
+		});
+
+		return ActionResponse(200, "Account deleted. We regret to see you go");
+	} catch (error) {
+		console.log(error);
+
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
 	}
 }

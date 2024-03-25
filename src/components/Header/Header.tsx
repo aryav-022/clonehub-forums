@@ -1,13 +1,13 @@
 import { db } from "@/lib/db";
-import { ActionResponse, Prettify, cn } from "@/lib/utils";
-import { Community, Post, User } from "@prisma/client";
+import { Prettify, cn } from "@/lib/utils";
+import type { Community } from "@prisma/client";
 import type { Session } from "next-auth";
-import { FC } from "react";
-import Paragraph from "./Paragraph";
-import { JoinCommunityForm, LeaveCommunityForm } from "../Forms";
-import Link from "next/link";
-import { buttonVariants } from "../ui/Button";
 import Image from "next/image";
+import Link from "next/link";
+import { FC } from "react";
+import { JoinCommunityForm, LeaveCommunityForm } from "../Forms";
+import { buttonVariants } from "../ui/Button";
+import Paragraph from "./Paragraph";
 
 type ExtendedCommunity = Prettify<
 	Community & {
@@ -41,15 +41,9 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 			<div className="mb-8 flex items-start gap-6 px-8">
 				{/* Profile Photo */}
 				<div className="relative bottom-10">
-					<div className="h-24 w-24 overflow-hidden rounded-full border-2 border-white bg-neutral-800">
+					<div className="grid h-24 w-24 place-items-center overflow-hidden rounded-full border-2 border-white bg-neutral-800">
 						{community.image && (
-							<Image
-								src={community.image}
-								alt="Profile Picture"
-								height={96}
-								width={96}
-								className="rounded-full"
-							/>
+							<Image src={community.image} alt="Profile Picture" height={96} width={96} />
 						)}
 					</div>
 				</div>

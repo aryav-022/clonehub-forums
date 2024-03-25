@@ -2,7 +2,15 @@ import { z } from "zod";
 
 const MAX_PROFILE_PICTURE_SIZE = 200000; // 200KB
 const MAX_BANNER_SIZE = 2000000; // 2MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ACCEPTED_IMAGE_TYPES = [
+	"image/jpeg",
+	"image/jpg",
+	"image/png",
+	"image/webp",
+	"image/gif",
+	"image/svg",
+	"image/svg+xml",
+];
 
 export const CommunityValidator = z.object({
 	communityName: z
@@ -29,7 +37,7 @@ export const CommunityValidator = z.object({
 		)
 		.refine(
 			(file) => !file?.size || ACCEPTED_IMAGE_TYPES.includes(file?.type),
-			"Only .jpg, .jpeg, .png and .webp formats are supported."
+			"Only .jpg, .jpeg, .png, .webp, .gif and .svg formats are supported."
 		),
 	banner: z
 		.any()
@@ -37,7 +45,7 @@ export const CommunityValidator = z.object({
 		.refine((file) => !file?.size || file?.size <= MAX_BANNER_SIZE, `Max image size is 2MB.`)
 		.refine(
 			(file) => !file?.size || ACCEPTED_IMAGE_TYPES.includes(file?.type),
-			"Only .jpg, .jpeg, .png and .webp formats are supported."
+			"Only .jpg, .jpeg, .png, .webp, .gif and .svg formats are supported."
 		),
 });
 

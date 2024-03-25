@@ -57,15 +57,13 @@ const Comments: FC<CommentsProps> = ({ postId, replyToId, comments, setComments,
 
 	return (
 		<ul className="m-4 space-y-4 border-l-2 pl-6">
-			<Show If={comments.length === 0}>
+			{comments.length === 0 ? (
 				<p>No comments yet.</p>
-			</Show>
-
-			<Show Else={comments.length === 0}>
-				{comments.map((comment) => (
+			) : (
+				comments.map((comment) => (
 					<CommentCard key={comment.id} comment={comment} session={session} />
-				))}
-			</Show>
+				))
+			)}
 
 			<CommentPlaceholder ref={ref} />
 		</ul>
@@ -82,16 +80,20 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 
 	let currVote: -1 | 0 | 1 = 0;
 
-	const initialVotes = comment.commentVotes.reduce((acc, vote) => {
-		if (vote.userId === session?.user.id) {
-			if (vote.type === "UP") currVote = 1;
-			if (vote.type === "DOWN") currVote = -1;
-		}
+	const initialVotes = useMemo(
+		() =>
+			comment.commentVotes?.reduce((acc, vote) => {
+				if (vote.userId === session?.user.id) {
+					if (vote.type === "UP") currVote = 1;
+					if (vote.type === "DOWN") currVote = -1;
+				}
 
-		if (vote.type === "UP") return acc + 1;
-		else if (vote.type === "DOWN") return acc - 1;
-		return acc;
-	}, 0);
+				if (vote.type === "UP") return acc + 1;
+				else if (vote.type === "DOWN") return acc - 1;
+				return acc;
+			}, 0) || 0,
+		[comment]
+	);
 
 	return (
 		<li>
