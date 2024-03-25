@@ -32,13 +32,16 @@ const Page: FC<pageProps> = ({}) => {
 	}
 
 	return (
-		<section className="col-span-4 my-8 space-y-8 px-8">
+		<section className="col-span-5 my-8 space-y-8 sm:px-8 lg:col-span-4">
 			<div>
 				<h1 className="mb-1 text-2xl font-semibold">Create Community</h1>
 				<p>Please fill in the required information below:</p>
 			</div>
 
-			<form className="grid grid-cols-2 gap-x-20 gap-y-12" action={submitForm}>
+			<form
+				className="max-md:space-y-8 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:gap-x-20"
+				action={submitForm}
+			>
 				<fieldset className="flex flex-col gap-2 text-sm">
 					<label htmlFor="name" className="font-medium">
 						Community Name

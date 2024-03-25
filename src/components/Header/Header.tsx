@@ -25,7 +25,7 @@ interface HeaderProps {
 
 const Header: FC<HeaderProps> = async ({ community, session }) => {
 	return (
-		<header className="col-span-4 space-y-4 border-b pb-4">
+		<header className="col-span-4 border-b pb-4 sm:space-y-4">
 			{/* Banner */}
 			<div className="relative h-56 w-full overflow-hidden rounded-lg bg-neutral-300">
 				{community.banner && (
@@ -38,9 +38,9 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 				)}
 			</div>
 
-			<div className="mb-8 flex items-start gap-6 px-8">
+			<div className="mb-8 flex items-start max-sm:flex-col sm:gap-6 sm:px-8">
 				{/* Profile Photo */}
-				<div className="relative bottom-10">
+				<div className="relative bottom-10 max-sm:mx-auto">
 					<div className="grid h-24 w-24 place-items-center overflow-hidden rounded-full border-2 border-white bg-neutral-800">
 						{community.image && (
 							<Image src={community.image} alt="Profile Picture" height={96} width={96} />

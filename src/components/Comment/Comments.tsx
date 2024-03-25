@@ -1,19 +1,19 @@
 "use client";
 
 import { COMMENTS_PER_POST } from "@/config";
-import { loadComments, voteComment } from "@/lib/actions";
-import { type ActionResponse, Show, cn, timeFromNow } from "@/lib/utils";
+import { loadComments } from "@/lib/actions";
+import { Show, timeFromNow } from "@/lib/utils";
 import { useIntersection } from "@mantine/hooks";
 import type { Comment, CommentVote, User } from "@prisma/client";
-import { ArrowBigDown, ArrowBigUp, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState, type FC, useOptimistic, useMemo } from "react";
+import React, { useEffect, useMemo, useState, type FC } from "react";
+import VoteCard from "../VoteCard";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import CommentForm from "./CommentForm";
-import VoteCard from "../VoteCard";
 
 export type ExtendedComments = Comment & {
 	author: User;
@@ -98,7 +98,7 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 	return (
 		<li>
 			<div className="flex items-start gap-2">
-				<div className="h-8 w-8 overflow-hidden rounded-full bg-neutral-800">
+				<div className="grid h-8 min-h-8 w-8 min-w-8 place-items-center overflow-hidden rounded-full bg-neutral-800">
 					<Show If={!!comment.author.image}>
 						<Image src={comment.author.image!} alt="profile picture" height={36} width={36} />
 					</Show>

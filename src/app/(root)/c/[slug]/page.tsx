@@ -35,11 +35,11 @@ const Page = async ({ params: { slug } }: PageProps) => {
 	const posts = await loadPosts({ where });
 
 	return (
-		<div className="col-span-4 space-y-4 py-4">
+		<div className="col-span-5 space-y-4 py-4 lg:col-span-4">
 			<Header community={community} session={session} />
 
 			<div className="grid grid-cols-3 items-start gap-4">
-				<section className="col-span-2 min-h-dvh space-y-4 pb-4">
+				<section className="col-span-3 min-h-dvh space-y-4 pb-4 md:col-span-2">
 					<CreatePostInput slug={slug} session={session} />
 					<PostFeed session={session} initialPosts={posts} where={where} />
 				</section>

@@ -85,7 +85,7 @@ const ChangeUsername: FC<ChangeUsernameProps> = ({ user }) => {
 					name="username"
 					id="username"
 					defaultValue={user.username as string}
-					className="rounded-l-md border-2 border-r-0 px-2 py-1 focus:outline-none focus:ring-2"
+					className="rounded-l-md border-2 border-r-0 px-2 py-1 focus:outline-none focus:ring-2 max-sm:w-48"
 				/>
 				<SubmitButton />
 			</div>

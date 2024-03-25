@@ -20,7 +20,7 @@ interface DescriptionCardProps {
 
 const DescriptionCard: FC<DescriptionCardProps> = ({ session, community }) => {
 	return (
-		<div className="scrollbar-thin sticky top-16 space-y-6 overflow-auto rounded-xl bg-neutral-100 px-6 py-8">
+		<div className="scrollbar-thin sticky top-16 space-y-6 overflow-auto rounded-xl bg-neutral-100 px-6 py-8 max-md:hidden">
 			{community ? (
 				<>
 					<h1 className="font-medium">c/{community.name}</h1>

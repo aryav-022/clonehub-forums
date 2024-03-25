@@ -53,7 +53,7 @@ const Page = async ({ params: { id } }: PageProps) => {
 	const comments = await loadComments({ postId: id });
 
 	return (
-		<div className="col-span-3 my-4 space-y-4">
+		<div className="col-span-5 my-4 space-y-4 lg:col-span-3">
 			<Link href={`/c/${post.community.name}`} className={buttonVariants({ variant: "ghost" })}>
 				<ChevronLeft /> Back Community
 			</Link>

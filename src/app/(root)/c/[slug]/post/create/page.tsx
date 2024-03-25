@@ -7,7 +7,7 @@ const Page = () => {
 	const { slug } = useParams<{ slug: string }>();
 
 	return (
-		<section className="col-span-4 py-4">
+		<section className="col-span-5 lg:col-span-4 py-4">
 			<h1 className="relative pb-2 after:absolute after:bottom-0 after:left-0 after:h-1 after:w-16 after:rounded-3xl after:bg-neutral-300">
 				Create Post in <span className="font-medium">c/{slug.toLowerCase()}</span>
 			</h1>

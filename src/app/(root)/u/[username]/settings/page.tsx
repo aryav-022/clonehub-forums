@@ -22,16 +22,16 @@ const Page = async ({ params: { username } }: PageProps) => {
 	if (!user) return notFound();
 
 	return (
-		<section className="col-span-4 space-y-4 p-8">
+		<section className="col-span-5 space-y-4 py-8 sm:p-8 lg:col-span-4">
 			<h1 className="text-3xl font-semibold">User Settings</h1>
 
 			<div className="space-y-4 rounded-lg bg-neutral-50 p-4">
 				<h2 className="text-xl font-medium">Account</h2>
-				<ul className="grid grid-cols-2">
+				<ul className="grid gap-8 md:grid-cols-2">
 					<li>
 						<ChangeUsername user={user} />
 					</li>
-					<li className="flex gap-2">
+					<li className="flex lg:gap-2">
 						<h3 className="text-sm font-medium">Change Profile Picture</h3>
 						<ChangeProfilePicture user={user} />
 					</li>

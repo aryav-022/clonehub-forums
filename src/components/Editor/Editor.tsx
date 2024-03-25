@@ -178,7 +178,7 @@ const Editor: FC<EditorProps> = ({ slug }) => {
 	}
 
 	return (
-		<div className="m-6 w-fit rounded-lg border border-neutral-300 bg-neutral-50 p-4">
+		<div className="my-6 w-fit rounded-lg border border-neutral-300 bg-neutral-50 p-4 md:m-6">
 			<form action={handleSubmit}>
 				<div className="prose prose-stone dark:prose-invert">
 					<TextareaAutosize
@@ -187,7 +187,7 @@ const Editor: FC<EditorProps> = ({ slug }) => {
 						id="title"
 						required
 						placeholder="Title"
-						className="w-fit resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none"
+						className="w-fit resize-none appearance-none overflow-hidden bg-transparent text-2xl font-bold focus:outline-none sm:text-3xl md:text-5xl"
 					/>
 				</div>
 

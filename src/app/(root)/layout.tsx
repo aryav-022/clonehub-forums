@@ -10,7 +10,7 @@ export default async function Layout({
 		<>
 			<Navbar />
 
-			<main className="mx-auto grid max-w-screen-2xl grid-cols-5 items-start gap-4 px-6">
+			<main className="mx-auto grid max-w-screen-2xl grid-cols-5 items-start gap-4 px-4 sm:px-6">
 				<Sidebar />
 				{children}
 			</main>

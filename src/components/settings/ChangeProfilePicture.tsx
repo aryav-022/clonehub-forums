@@ -1,13 +1,12 @@
 "use client";
 
-import { uploadFile } from "@/lib/cloudinary";
+import { updateProfilePicture } from "@/lib/actions";
 import type { User } from "@prisma/client";
 import { Upload } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FC, startTransition, useEffect, useOptimistic, useRef, useState } from "react";
 import { useToast } from "../ui/Toast";
-import { updateProfilePicture } from "@/lib/actions";
-import { useRouter } from "next/navigation";
 
 interface ChangeProfilePictureProps {
 	user: User;
@@ -98,7 +97,7 @@ const ChangeProfilePicture: FC<ChangeProfilePictureProps> = ({ user }) => {
 	return (
 		<div className="flex gap-4">
 			<button
-				className="relative grid h-40 min-h-40 w-40 min-w-40 place-items-center overflow-hidden rounded-full bg-neutral-800"
+				className="relative grid h-28 min-h-28 w-28 min-w-28 place-items-center overflow-hidden rounded-full bg-neutral-800 sm:h-40 sm:min-h-40 sm:w-40 sm:min-w-40"
 				type="button"
 				onClick={uploadImage}
 			>
