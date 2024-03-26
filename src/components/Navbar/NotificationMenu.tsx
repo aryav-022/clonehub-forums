@@ -60,7 +60,7 @@ const NotificationMenu: FC<NotificationMenuProps> = ({ userId, initialNotificati
 				className="scrollbar-thin absolute -right-8 top-full z-10 mt-2 max-h-96 w-64 origin-top scale-y-0 divide-y overflow-auto rounded-md border bg-white p-2 text-sm shadow-md transition-all focus-within:scale-y-100 hover:scale-y-100 group-focus-within:scale-y-100 sm:right-0"
 			>
 				{notifications.map((notification) => (
-					<NotificationCard notification={notification} />
+					<NotificationCard key={notification.id} notification={notification} />
 				))}
 
 				<form action={loadMore}>
