@@ -2,7 +2,7 @@
 
 import { COMMENTS_PER_POST } from "@/config";
 import { loadComments } from "@/lib/actions";
-import { Show, timeFromNow } from "@/lib/utils";
+import { Show, cn, isValidUrl, timeFromNow } from "@/lib/utils";
 import { useIntersection } from "@mantine/hooks";
 import type { Comment, CommentVote, User } from "@prisma/client";
 import { MessageSquare } from "lucide-react";
@@ -15,7 +15,7 @@ import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import CommentForm from "./CommentForm";
 
-export type ExtendedComments = Comment & {
+export type ExtendedComment = Comment & {
 	author: User;
 	commentVotes: CommentVote[];
 };
@@ -25,8 +25,9 @@ interface CommentsProps {
 	replyToId?: string;
 	session: Session | null;
 	variant: "Post" | "Comment";
-	initialComments: ExtendedComments[];
+	initialComments: ExtendedComment[];
 	author?: string;
+	highlightedComment?: ExtendedComment | null;
 }
 
 const Comments: FC<CommentsProps> = ({
@@ -36,8 +37,9 @@ const Comments: FC<CommentsProps> = ({
 	variant,
 	initialComments,
 	author,
+	highlightedComment,
 }) => {
-	const [comments, setComments] = useState<ExtendedComments[]>(initialComments);
+	const [comments, setComments] = useState<ExtendedComment[]>(initialComments);
 	const [shouldLoad, setShouldLoad] = useState<boolean>(true);
 
 	const { ref, entry } = useIntersection();
@@ -66,7 +68,7 @@ const Comments: FC<CommentsProps> = ({
 		}
 	}, [entry, comments, postId, replyToId, variant, setComments, toast, shouldLoad, setShouldLoad]);
 
-	function addComment(comment: ExtendedComments) {
+	function addComment(comment: ExtendedComment) {
 		setComments((prev) => [comment, ...prev]);
 	}
 
@@ -82,6 +84,15 @@ const Comments: FC<CommentsProps> = ({
 			/>
 
 			<ul className="m-4 space-y-4 border-l-2 pl-6">
+				<Show If={!!highlightedComment}>
+					<CommentCard
+						postId={postId}
+						comment={highlightedComment!}
+						session={session}
+						highlighted={true}
+					/>
+				</Show>
+
 				<Show If={comments.length === 0}>
 					<li>No comments yet.</li>
 				</Show>
@@ -100,16 +111,43 @@ const Comments: FC<CommentsProps> = ({
 	);
 };
 
+export function formatContent(content: string) {
+	return content.split(" ").map((word, index) => {
+		if (word.startsWith("@")) {
+			return (
+				<>
+					<Link key={index} href={`/u/${word.slice(1)}`} className="font-medium text-orange-500">
+						{word}
+					</Link>{" "}
+				</>
+			);
+		} else if (isValidUrl(word)) {
+			return (
+				<>
+					<a key={word} href={word} className="font-medium text-blue-500">
+						{word}
+					</a>{" "}
+				</>
+			);
+		} else {
+			return word + " ";
+		}
+	});
+}
+
 function CommentCard({
 	comment,
 	postId,
 	session,
+	highlighted,
 }: {
-	comment: ExtendedComments;
+	comment: ExtendedComment;
 	postId: string;
 	session: Session | null;
+	highlighted?: boolean;
 }) {
 	const [showReplies, setShowReplies] = useState(false);
+	const cardRef = React.useRef<HTMLLIElement | null>(null);
 
 	let currVote: -1 | 0 | 1 = 0;
 
@@ -125,8 +163,14 @@ function CommentCard({
 			return acc;
 		}, 0) || 0;
 
+	useEffect(() => {
+		if (highlighted) {
+			cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+		}
+	}, [highlighted]);
+
 	return (
-		<li>
+		<li className={cn({ "rounded-lg bg-orange-100": highlighted })} ref={cardRef}>
 			<div className="flex items-start gap-2">
 				<div className="grid h-8 min-h-8 w-8 min-w-8 place-items-center overflow-hidden rounded-full bg-neutral-800">
 					<Show If={!!comment.author.image}>
@@ -142,7 +186,7 @@ function CommentCard({
 						&bull; {timeFromNow(comment.createdAt)}
 					</small>
 
-					<p>{comment.content}</p>
+					<p>{formatContent(comment.content)}</p>
 				</div>
 			</div>
 

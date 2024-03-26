@@ -12,9 +12,10 @@ interface PageProps {
 	params: {
 		id: string;
 	};
+	searchParams: { [key: string]: string | string[] | undefined };
 }
 
-const Page = async ({ params: { id } }: PageProps) => {
+const Page = async ({ params: { id }, searchParams: { comment } }: PageProps) => {
 	const post = await db.post.findUnique({
 		where: { id },
 		include: {
@@ -65,7 +66,7 @@ const Page = async ({ params: { id } }: PageProps) => {
 					</div>
 				</section>
 
-				<CommentSection session={session} post={post} />
+				<CommentSection session={session} post={post} commentId={comment} />
 			</main>
 		</div>
 	);

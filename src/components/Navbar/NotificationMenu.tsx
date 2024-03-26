@@ -108,12 +108,7 @@ function NotificationMessage({ notification }: { notification: ExtendedNotificat
 
 	return (
 		<p>
-			<Link
-				href={`/u/${notification.userTriggered.username}`}
-				className="font-semibold text-orange-500"
-			>
-				{notification.userTriggered.username}
-			</Link>{" "}
+			<span className="font-semibold text-orange-500">{notification.userTriggered.username}</span>{" "}
 			{messages[notification.type]}
 		</p>
 	);

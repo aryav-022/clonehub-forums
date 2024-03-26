@@ -10,14 +10,14 @@ import { useFormStatus } from "react-dom";
 import { ZodError } from "zod";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
-import type { ExtendedComments } from "./Comments";
+import type { ExtendedComment } from "./Comments";
 
 interface CommentFormProps {
 	postId: string;
 	replyToId?: string;
 	variant: "Post" | "Comment";
 	session: Session | null;
-	addComment: (comment: ExtendedComments) => void;
+	addComment: (comment: ExtendedComment) => void;
 	author?: string;
 }
 
