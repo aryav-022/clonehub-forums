@@ -7,7 +7,12 @@ import { ZodError } from "zod";
 import { db } from "./db";
 import { CommunityValidator } from "./validators/community";
 import { PostCreationRequest } from "./validators/post";
-import { COMMENTS_PER_POST, POSTS_PER_PAGE, SEARCH_RESULTS_LIMIT } from "@/config";
+import {
+	COMMENTS_PER_POST,
+	NOTIFICATIONS_PER_PAGE,
+	POSTS_PER_PAGE,
+	SEARCH_RESULTS_LIMIT,
+} from "@/config";
 import { CommentCreationRequest } from "./validators/comment";
 import type { VoteType } from "@prisma/client";
 
@@ -149,6 +154,11 @@ export async function loadPosts({ where, page = 0 }: LoadPostsParams) {
 	});
 }
 
+function detectMentions(content: string): string[] {
+	const mentions = content.split(" ").filter((word) => word.startsWith("@"));
+	return mentions.map((mention) => mention.slice(1));
+}
+
 export async function createComment(payload: CommentCreationRequest): Promise<ActionResponse> {
 	try {
 		const session = await getAuthSession();
@@ -159,15 +169,11 @@ export async function createComment(payload: CommentCreationRequest): Promise<Ac
 
 		const comment = await db.comment.create({
 			data: {
-				...(payload.variant === "Post" && { postId: payload.id }),
-				...(payload.variant === "Comment" && { replyToId: payload.id }),
+				...(payload.variant === "Post" && { postId: payload.postId }),
+				...(payload.variant === "Comment" && { replyToId: payload.replyToId }),
 				authorId: session.user.id,
 				content: payload.content,
 			},
-		});
-
-		const extendedComment = await db.comment.findUnique({
-			where: { id: comment.id },
 			include: {
 				author: true,
 				_count: {
@@ -178,7 +184,27 @@ export async function createComment(payload: CommentCreationRequest): Promise<Ac
 			},
 		});
 
-		return ActionResponse(200, "Comment created successfully.", extendedComment);
+		const mentions = detectMentions(payload.content);
+
+		mentions.forEach(async (mention) => {
+			const user = await db.user.findFirst({
+				where: { username: mention },
+			});
+
+			if (user) {
+				await db.notification.create({
+					data: {
+						postId: payload.postId,
+						userTriggeredId: session.user.id,
+						userId: user.id,
+						type: "MENTIONED",
+						commentId: comment.id,
+					},
+				});
+			}
+		});
+
+		return ActionResponse(200, "Comment created successfully.", comment);
 	} catch (error) {
 		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
 	}
@@ -517,4 +543,34 @@ export async function deleteAccount() {
 
 		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
 	}
+}
+
+export async function loadNotifications(userId: string, page = 0) {
+	return await db.notification.findMany({
+		where: { userId },
+		include: {
+			userTriggered: true,
+			post: {
+				include: {
+					community: true,
+				},
+			},
+			comment: true,
+		},
+		orderBy: { createdAt: "desc" },
+		take: NOTIFICATIONS_PER_PAGE,
+		skip: page * NOTIFICATIONS_PER_PAGE,
+	});
+}
+
+export async function markAllNotificationsAsRead(userId: string) {
+	await db.notification.updateMany({
+		where: {
+			userId,
+			read: false,
+		},
+		data: {
+			read: true,
+		},
+	});
 }

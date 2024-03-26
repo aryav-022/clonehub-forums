@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { CommentValidator, type CommentCreationRequest } from "@/lib/validators/comment";
 import type { Session } from "next-auth";
 import { useRouter } from "next/navigation";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { ZodError } from "zod";
 import { Button } from "../ui/Button";
@@ -13,13 +13,22 @@ import { useToast } from "../ui/Toast";
 import type { ExtendedComments } from "./Comments";
 
 interface CommentFormProps {
-	id: string;
+	postId: string;
+	replyToId?: string;
 	variant: "Post" | "Comment";
 	session: Session | null;
 	addComment: (comment: ExtendedComments) => void;
+	author?: string;
 }
 
-export default function CommentForm({ id, variant, session, addComment }: CommentFormProps) {
+export default function CommentForm({
+	postId,
+	replyToId,
+	variant,
+	session,
+	addComment,
+	author,
+}: CommentFormProps) {
 	const toast = useToast();
 	const router = useRouter();
 
@@ -34,11 +43,14 @@ export default function CommentForm({ id, variant, session, addComment }: Commen
 			});
 		}
 
+		const content = formData.get("comment") as string;
+
 		try {
 			const entries: CommentCreationRequest = {
-				id,
+				postId,
+				replyToId,
 				variant,
-				content: formData.get("comment") as string,
+				content,
 			};
 
 			const payload = CommentValidator.parse(entries);
@@ -94,6 +106,7 @@ export default function CommentForm({ id, variant, session, addComment }: Commen
 						"rounded-r-none": variant === "Comment",
 					}
 				)}
+				defaultValue={author ? `@${author} ` : ""}
 			></textarea>
 
 			<SubmitButton variant={variant} />

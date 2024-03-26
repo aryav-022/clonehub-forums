@@ -21,13 +21,22 @@ export type ExtendedComments = Comment & {
 };
 
 interface CommentsProps {
-	id: string;
+	postId: string;
+	replyToId?: string;
 	session: Session | null;
 	variant: "Post" | "Comment";
 	initialComments: ExtendedComments[];
+	author?: string;
 }
 
-const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) => {
+const Comments: FC<CommentsProps> = ({
+	postId,
+	replyToId,
+	session,
+	variant,
+	initialComments,
+	author,
+}) => {
 	const [comments, setComments] = useState<ExtendedComments[]>(initialComments);
 	const [shouldLoad, setShouldLoad] = useState<boolean>(true);
 
@@ -38,7 +47,7 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 		if (shouldLoad && entry?.isIntersecting) {
 			(async () => {
 				const moreComments = await loadComments({
-					id,
+					id: variant === "Post" ? postId : replyToId!,
 					variant,
 					page: comments.length / COMMENTS_PER_POST,
 				});
@@ -55,7 +64,7 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 				}
 			})();
 		}
-	}, [entry, comments, id, variant, setComments, toast, shouldLoad, setShouldLoad]);
+	}, [entry, comments, postId, replyToId, variant, setComments, toast, shouldLoad, setShouldLoad]);
 
 	function addComment(comment: ExtendedComments) {
 		setComments((prev) => [comment, ...prev]);
@@ -63,7 +72,14 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 
 	return (
 		<>
-			<CommentForm id={id} variant={variant} session={session} addComment={addComment} />
+			<CommentForm
+				postId={postId}
+				replyToId={replyToId}
+				variant={variant}
+				session={session}
+				addComment={addComment}
+				author={author}
+			/>
 
 			<ul className="m-4 space-y-4 border-l-2 pl-6">
 				<Show If={comments.length === 0}>
@@ -72,7 +88,7 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 
 				<Show Else={comments.length === 0}>
 					{comments.map((comment) => (
-						<CommentCard key={comment.id} comment={comment} session={session} />
+						<CommentCard key={comment.id} postId={postId} comment={comment} session={session} />
 					))}
 				</Show>
 
@@ -84,7 +100,15 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 	);
 };
 
-function CommentCard({ comment, session }: { comment: ExtendedComments; session: Session | null }) {
+function CommentCard({
+	comment,
+	postId,
+	session,
+}: {
+	comment: ExtendedComments;
+	postId: string;
+	session: Session | null;
+}) {
 	const [showReplies, setShowReplies] = useState(false);
 
 	let currVote: -1 | 0 | 1 = 0;
@@ -135,7 +159,14 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 			</div>
 
 			<Show If={showReplies}>
-				<Comments id={comment.id} variant="Comment" session={session} initialComments={[]} />
+				<Comments
+					postId={postId}
+					replyToId={comment.id}
+					variant="Comment"
+					session={session}
+					initialComments={[]}
+					author={comment.author.username!}
+				/>
 			</Show>
 		</li>
 	);

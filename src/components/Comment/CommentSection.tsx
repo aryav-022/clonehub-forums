@@ -28,7 +28,12 @@ const CommentSection = async ({ post, session }: CommentSectionProps) => {
 
 			<hr />
 
-			<Comments id={post.id} session={session} variant="Post" initialComments={initialComments} />
+			<Comments
+				postId={post.id}
+				session={session}
+				variant="Post"
+				initialComments={initialComments}
+			/>
 		</section>
 	);
 };

@@ -1,28 +1,22 @@
 "use client";
 
-import type { User } from "next-auth";
-import Image from "next/image";
-import { FC, useRef } from "react";
-import { Button, buttonVariants } from "../ui/Button";
-import { signOut } from "next-auth/react";
-import { LogOut, Settings, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LogOut, Settings, User as UserIcon } from "lucide-react";
+import type { User } from "next-auth";
+import { signOut } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
+import { FC } from "react";
+import { Button, buttonVariants } from "../ui/Button";
 
 interface UserMenuProps {
 	user: User;
 }
 
 const UserMenu: FC<UserMenuProps> = ({ user }) => {
-	const menuRef = useRef<HTMLMenuElement | null>(null);
-
-	function toggleMenu() {
-		menuRef.current?.classList.toggle("scale-y-0");
-	}
-
 	return (
-		<div className="relative flex h-full items-center">
-			<button onClick={toggleMenu} className="relative aspect-square h-full">
+		<div className="group relative flex h-full items-center">
+			<button className="relative aspect-square h-full min-h-12">
 				<Image
 					src={user.image || ""}
 					alt="profile"
@@ -33,8 +27,8 @@ const UserMenu: FC<UserMenuProps> = ({ user }) => {
 			</button>
 
 			<menu
-				ref={menuRef}
-				className="absolute right-0 top-full z-10 mt-2 origin-top scale-y-0 divide-y overflow-hidden rounded-md border bg-white p-2 text-sm shadow-md transition-all"
+				tabIndex={0}
+				className="absolute right-0 top-full z-10 mt-2 origin-top scale-y-0 divide-y overflow-hidden rounded-md border bg-white p-2 text-sm shadow-md transition-all group-focus-within:scale-y-100"
 			>
 				<li className="p-2">
 					<div className="text-nowrap text-base">{user.name}</div>

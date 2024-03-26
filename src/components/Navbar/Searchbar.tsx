@@ -52,7 +52,7 @@ const Searchbar: FC<SearchbarProps> = ({}) => {
 							className="flex items-center gap-4 p-4 hover:bg-neutral-200"
 							onClick={removeFocus}
 						>
-							<div className="h-10 w-10 min-w-10 max-w-10 overflow-hidden rounded-full bg-neutral-800">
+							<div className="h-10 w-10 min-w-10 max-w-10 overflow-hidden rounded-full bg-neutral-800 max-sm:hidden">
 								{community.image && (
 									<Image src={community.image} alt={community.name} height={40} width={40} />
 								)}

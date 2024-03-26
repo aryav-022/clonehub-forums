@@ -2,7 +2,6 @@ import CommentSection from "@/components/Comment/CommentSection";
 import EditorOutput from "@/components/Editor/EditorOutput";
 import VoteCard from "@/components/VoteCard";
 import { buttonVariants } from "@/components/ui/Button";
-import { loadComments } from "@/lib/actions";
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ChevronLeft } from "lucide-react";
