@@ -60,7 +60,7 @@ async function CommunitySuggestion() {
 							className="flex h-40 w-40 cursor-pointer flex-col justify-between gap-2 rounded-lg bg-neutral-100 p-4 hover:bg-neutral-200"
 							href={`/c/${community.name}`}
 						>
-							<div className="mx-auto grid h-20 w-20 place-items-center rounded-full">
+							<div className="mx-auto grid h-20 w-20 place-items-center overflow-hidden rounded-full">
 								{community.image ? (
 									<Image src={community.image} alt={community.name} width={80} height={80} />
 								) : (
