@@ -1,12 +1,14 @@
-import { loadPosts } from "@/lib/actions";
-import type { Session } from "next-auth";
-import PostFeed from "./PostFeed";
-import { db } from "@/lib/db";
 import { COMMUNITIES_PER_PAGE } from "@/config";
+import { loadPosts } from "@/lib/actions";
+import { db } from "@/lib/db";
+import { Show } from "@/lib/utils";
+import type { Community } from "@prisma/client";
+import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
-import type { Community } from "@prisma/client";
-import { Show } from "@/lib/utils";
+import { Controllers } from "../Header/Header";
+import Paragraph from "../Header/Paragraph";
+import PostFeed from "./PostFeed";
 
 interface CustomFeedProps {
 	session: Session;
@@ -28,7 +30,7 @@ const CustomFeed = async ({ session }: CustomFeedProps) => {
 	return (
 		<>
 			<Show If={posts.length === 0}>
-				<CommunitySuggestion />
+				<CommunitySuggestion session={session} />
 			</Show>
 			<Show Else={posts.length === 0}>
 				<PostFeed initialPosts={posts} where={where} session={session} />
@@ -37,7 +39,7 @@ const CustomFeed = async ({ session }: CustomFeedProps) => {
 	);
 };
 
-async function CommunitySuggestion() {
+async function CommunitySuggestion({ session }: CustomFeedProps) {
 	const communities = await db.community.findMany({
 		take: COMMUNITIES_PER_PAGE,
 		orderBy: [
@@ -64,16 +66,16 @@ async function CommunitySuggestion() {
 
 			<ul className="flex flex-wrap gap-4 py-4">
 				{communities.map((community) => (
-					<CommunityCard key={community.id} community={community} />
+					<CommunityCard key={community.id} community={community} session={session} />
 				))}
 			</ul>
 		</div>
 	);
 }
 
-function CommunityCard({ community }: { community: Community }) {
+function CommunityCard({ community, session }: { community: Community; session: Session }) {
 	return (
-		<li>
+		<li className="group relative">
 			<Link
 				className="flex h-40 w-40 cursor-pointer flex-col justify-between gap-2 rounded-lg bg-neutral-100 p-4 hover:bg-neutral-200"
 				href={`/c/${community.name}`}
@@ -85,8 +87,22 @@ function CommunityCard({ community }: { community: Community }) {
 						<div className="h-20 w-20 bg-neutral-800" />
 					)}
 				</div>
-				<h2 className="text-center text-lg font-bold">c/{community.name}</h2>
+				<h2 className="w-full truncate text-center text-lg font-bold">c/{community.name}</h2>
 			</Link>
+
+			<div className="absolute bottom-1/2 left-1/2 z-40 hidden w-96 space-y-2 rounded-lg bg-white p-4 shadow-lg group-hover:flex group-hover:flex-col">
+				<div className="flex flex-wrap items-center gap-2">
+					<Link href={`/c/${community.name}`}>
+						<h1 className="text-lg font-bold">{community.name}</h1>
+					</Link>
+
+					<Controllers community={community} session={session} size="xs" />
+				</div>
+
+				<Paragraph lineClamp="line-clamp-3" className="text-sm">
+					{community.description}
+				</Paragraph>
+			</div>
 		</li>
 	);
 }

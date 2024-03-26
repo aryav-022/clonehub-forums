@@ -1,25 +1,23 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FC, forwardRef, useState } from "react";
+import { FC, forwardRef, useRef, useState } from "react";
 
 interface ParagraphProps extends React.HTMLProps<HTMLParagraphElement> {
-	lineClamp?: string;
+	lineClamp: string;
 }
 
 const Paragraph: FC<ParagraphProps> = forwardRef<HTMLParagraphElement, ParagraphProps>(
 	({ children, lineClamp, onClick: callback, className, ...props }, ref) => {
-		const [isClamped, setIsClamped] = useState(true);
-
 		function toggleLineClamp(e: any) {
-			setIsClamped((prev) => !prev);
+			e.target.classList.toggle(lineClamp);
 			if (callback) callback(e);
 		}
 
 		return (
 			<p
 				ref={ref}
-				className={cn("cursor-pointer", className, { lineClamp: isClamped })}
+				className={cn("cursor-pointer", className, lineClamp)}
 				{...props}
 				onClick={toggleLineClamp}
 			>

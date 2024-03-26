@@ -26,7 +26,7 @@ const DescriptionCard: FC<DescriptionCardProps> = ({ session, community }) => {
 					<h1 className="font-medium">c/{community.name}</h1>
 
 					<div className="space-y-3">
-						<p className="text-balance text-sm text-gray-600">{community!.description}</p>
+						<p className="text-balance text-sm text-gray-600">{community.description}</p>
 
 						<dl className="divide-y">
 							<div className="flex w-full justify-between gap-2 py-2 text-sm">
@@ -46,7 +46,7 @@ const DescriptionCard: FC<DescriptionCardProps> = ({ session, community }) => {
 						</dl>
 
 						<div className="space-y-2 pt-2">
-							<Controllers session={session} community={community!} />
+							<Controllers session={session} community={community} size="lg" />
 
 							<Show If={!!session}>
 								<Link

@@ -6,7 +6,9 @@ import { useFormStatus } from "react-dom";
 import { Button } from "./ui/Button";
 import { useToast } from "./ui/Toast";
 
-export function JoinCommunityForm({ id }: { id: string }) {
+export type Size = "default" | "sm" | "xs" | "lg" | null | undefined;
+
+export function JoinCommunityForm({ id, size }: { id: string; size?: Size }) {
 	const router = useRouter();
 	const toast = useToast();
 
@@ -27,12 +29,12 @@ export function JoinCommunityForm({ id }: { id: string }) {
 
 	return (
 		<form action={join}>
-			<SubmitButton>Join Community</SubmitButton>
+			<SubmitButton size={size}>Join Community</SubmitButton>
 		</form>
 	);
 }
 
-export function LeaveCommunityForm({ id }: { id: string }) {
+export function LeaveCommunityForm({ id, size }: { id: string; size?: Size }) {
 	const router = useRouter();
 	const toast = useToast();
 
@@ -55,16 +57,22 @@ export function LeaveCommunityForm({ id }: { id: string }) {
 
 	return (
 		<form action={leave}>
-			<SubmitButton>Leave Community</SubmitButton>
+			<SubmitButton size={size}>Leave Community</SubmitButton>
 		</form>
 	);
 }
 
-function SubmitButton({ children }: { children?: React.ReactNode }) {
+function SubmitButton({ children, size }: { children?: React.ReactNode; size?: Size }) {
 	const { pending } = useFormStatus();
 
 	return (
-		<Button size="lg" type="submit" className="w-full" aria-disabled={pending} isLoading={pending}>
+		<Button
+			size={size}
+			type="submit"
+			className="w-full"
+			aria-disabled={pending}
+			isLoading={pending}
+		>
 			{children}
 		</Button>
 	);

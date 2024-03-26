@@ -5,7 +5,7 @@ import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
-import { JoinCommunityForm, LeaveCommunityForm } from "../Forms";
+import { JoinCommunityForm, LeaveCommunityForm, Size } from "../Forms";
 import { buttonVariants } from "../ui/Button";
 import Paragraph from "./Paragraph";
 
@@ -71,7 +71,7 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 
 					{/* Controlls */}
 					<div className="w-fit">
-						<Controllers community={community} session={session} />
+						<Controllers community={community} session={session} size="lg" />
 					</div>
 				</div>
 			</div>
@@ -79,7 +79,13 @@ const Header: FC<HeaderProps> = async ({ community, session }) => {
 	);
 };
 
-export async function Controllers({ community, session }: HeaderProps) {
+interface ControllersProps {
+	community: Community;
+	session: Session | null;
+	size?: Size;
+}
+
+export async function Controllers({ community, session, size }: ControllersProps) {
 	if (!session) {
 		return (
 			<Link href="/signin" className={cn(buttonVariants({ size: "lg", className: "w-full" }))}>
@@ -107,10 +113,10 @@ export async function Controllers({ community, session }: HeaderProps) {
 	});
 
 	if (isMember) {
-		return <LeaveCommunityForm id={community.id} />;
+		return <LeaveCommunityForm id={community.id} size={size} />;
 	}
 
-	return <JoinCommunityForm id={community.id} />;
+	return <JoinCommunityForm id={community.id} size={size} />;
 }
 
 export default Header;
