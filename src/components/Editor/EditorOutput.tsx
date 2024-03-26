@@ -44,7 +44,7 @@ const EditorOutput: FC<EditorOutputProps> = ({ content }) => {
 				},
 			});
 		}
-	}, []);
+	}, [content, id]);
 
 	useEffect(() => {
 		const init = async () => {

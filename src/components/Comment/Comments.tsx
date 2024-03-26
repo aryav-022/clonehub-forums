@@ -9,7 +9,7 @@ import { MessageSquare } from "lucide-react";
 import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useMemo, useState, type FC } from "react";
+import React, { useEffect, useState, type FC } from "react";
 import VoteCard from "../VoteCard";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
@@ -21,14 +21,15 @@ export type ExtendedComments = Comment & {
 };
 
 interface CommentsProps {
-	postId?: string;
-	replyToId?: string;
-	comments: ExtendedComments[];
-	setComments: React.Dispatch<React.SetStateAction<ExtendedComments[]>>;
+	id: string;
 	session: Session | null;
+	variant: "Post" | "Comment";
+	initialComments: ExtendedComments[];
 }
 
-const Comments: FC<CommentsProps> = ({ postId, replyToId, comments, setComments, session }) => {
+const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) => {
+	const [comments, setComments] = useState<ExtendedComments[]>(initialComments);
+
 	const { ref, entry } = useIntersection();
 	const toast = useToast();
 
@@ -36,13 +37,13 @@ const Comments: FC<CommentsProps> = ({ postId, replyToId, comments, setComments,
 		if (entry?.isIntersecting) {
 			(async () => {
 				const moreComments = await loadComments({
-					...(postId !== undefined && { postId }),
-					...(replyToId !== undefined && { replyToId }),
+					id,
+					variant,
 					page: comments.length / COMMENTS_PER_POST,
 				});
 
 				if (!moreComments || moreComments.length === 0) {
-					entry.target.remove();
+					entry.target.classList.add("hidden");
 
 					toast({
 						title: "No more comments",
@@ -53,47 +54,49 @@ const Comments: FC<CommentsProps> = ({ postId, replyToId, comments, setComments,
 				}
 			})();
 		}
-	}, [entry, comments, postId, replyToId, setComments, toast]);
+	}, [entry, comments, id, variant, setComments, toast]);
+
+	function addComment(comment: ExtendedComments) {
+		setComments((prev) => [comment, ...prev]);
+	}
 
 	return (
-		<ul className="m-4 space-y-4 border-l-2 pl-6">
-			{comments.length === 0 ? (
-				<p>No comments yet.</p>
-			) : (
-				comments.map((comment) => (
-					<CommentCard key={comment.id} comment={comment} session={session} />
-				))
-			)}
+		<>
+			<CommentForm id={id} variant={variant} session={session} addComment={addComment} />
 
-			<CommentPlaceholder ref={ref} />
-		</ul>
+			<ul className="m-4 space-y-4 border-l-2 pl-6">
+				<Show If={comments.length === 0}>
+					<li>No comments yet.</li>
+				</Show>
+
+				<Show Else={comments.length === 0}>
+					{comments.map((comment) => (
+						<CommentCard key={comment.id} comment={comment} session={session} />
+					))}
+				</Show>
+
+				<CommentPlaceholder ref={ref} />
+			</ul>
+		</>
 	);
 };
 
 function CommentCard({ comment, session }: { comment: ExtendedComments; session: Session | null }) {
 	const [showReplies, setShowReplies] = useState(false);
-	const [replies, setReplies] = useState<ExtendedComments[]>([]);
-
-	function addReply(reply: ExtendedComments) {
-		setReplies((prev) => [reply, ...prev]);
-	}
 
 	let currVote: -1 | 0 | 1 = 0;
 
-	const initialVotes = useMemo(
-		() =>
-			comment.commentVotes?.reduce((acc, vote) => {
-				if (vote.userId === session?.user.id) {
-					if (vote.type === "UP") currVote = 1;
-					if (vote.type === "DOWN") currVote = -1;
-				}
+	const initialVotes =
+		comment.commentVotes?.reduce((acc, vote) => {
+			if (vote.userId === session?.user.id) {
+				if (vote.type === "UP") currVote = 1;
+				if (vote.type === "DOWN") currVote = -1;
+			}
 
-				if (vote.type === "UP") return acc + 1;
-				else if (vote.type === "DOWN") return acc - 1;
-				return acc;
-			}, 0) || 0,
-		[comment]
-	);
+			if (vote.type === "UP") return acc + 1;
+			else if (vote.type === "DOWN") return acc - 1;
+			return acc;
+		}, 0) || 0;
 
 	return (
 		<li>
@@ -129,14 +132,7 @@ function CommentCard({ comment, session }: { comment: ExtendedComments; session:
 			</div>
 
 			<Show If={showReplies}>
-				<CommentForm replyToId={comment.id} session={session} addComment={addReply} rows={1} />
-
-				<Comments
-					comments={replies}
-					replyToId={comment.id}
-					session={session}
-					setComments={setReplies}
-				/>
+				<Comments id={comment.id} variant="Comment" session={session} initialComments={[]} />
 			</Show>
 		</li>
 	);

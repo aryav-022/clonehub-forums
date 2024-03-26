@@ -1,31 +1,25 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-import { Button } from "../ui/Button";
-import { ZodError } from "zod";
-import { useToast } from "../ui/Toast";
 import { createComment } from "@/lib/actions";
-import { type CommentCreationRequest, CommentValidator } from "@/lib/validators/comment";
+import { cn } from "@/lib/utils";
+import { CommentValidator, type CommentCreationRequest } from "@/lib/validators/comment";
 import type { Session } from "next-auth";
 import { useRouter } from "next/navigation";
+import React, { useRef } from "react";
+import { useFormStatus } from "react-dom";
+import { ZodError } from "zod";
+import { Button } from "../ui/Button";
+import { useToast } from "../ui/Toast";
 import type { ExtendedComments } from "./Comments";
-import { useRef } from "react";
 
 interface CommentFormProps {
+	id: string;
+	variant: "Post" | "Comment";
 	session: Session | null;
-	postId?: string;
-	replyToId?: string;
 	addComment: (comment: ExtendedComments) => void;
-	rows?: number;
 }
 
-export default function CommentForm({
-	postId,
-	replyToId,
-	session,
-	addComment,
-	rows,
-}: CommentFormProps) {
+export default function CommentForm({ id, variant, session, addComment }: CommentFormProps) {
 	const toast = useToast();
 	const router = useRouter();
 
@@ -42,23 +36,22 @@ export default function CommentForm({
 
 		try {
 			const entries: CommentCreationRequest = {
+				id,
+				variant,
 				content: formData.get("comment") as string,
-				postId,
-				replyToId,
-				authorId: session.user.id,
 			};
 
 			const payload = CommentValidator.parse(entries);
 			const res = await createComment(payload);
 
 			if (res.status === 200) {
+				addComment(res.data);
+
 				toast({
 					title: "Success",
 					message: "Comment created successfully.",
 					variant: "success",
 				});
-
-				addComment(res.data);
 
 				router.refresh();
 			} else {
@@ -88,26 +81,36 @@ export default function CommentForm({
 	}
 
 	return (
-		<form ref={formRef} action={handleSubmit}>
+		<form ref={formRef} action={handleSubmit} className={cn({ flex: variant === "Comment" })}>
 			<textarea
 				name="comment"
 				id="comment"
 				required
 				placeholder="Write your thoughts..."
-				rows={rows || 3}
-				className="w-full resize-none rounded-lg border p-2 focus:outline-none focus:ring-2"
+				rows={variant === "Post" ? 3 : 1}
+				className={cn(
+					"w-full resize-none rounded-lg border px-2 py-1 focus:outline-none focus:ring-2",
+					{
+						"rounded-r-none": variant === "Comment",
+					}
+				)}
 			></textarea>
 
-			<SubmitButton />
+			<SubmitButton variant={variant} />
 		</form>
 	);
 }
 
-function SubmitButton() {
+function SubmitButton({ variant }: { variant: "Post" | "Comment" }) {
 	const { pending } = useFormStatus();
 
 	return (
-		<Button type="submit" aria-disabled={pending} isLoading={pending}>
+		<Button
+			type="submit"
+			aria-disabled={pending}
+			isLoading={pending}
+			className={cn({ "rounded-l-none": variant === "Comment" })}
+		>
 			Comment
 		</Button>
 	);

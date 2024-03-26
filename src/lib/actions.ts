@@ -159,10 +159,10 @@ export async function createComment(payload: CommentCreationRequest): Promise<Ac
 
 		const comment = await db.comment.create({
 			data: {
+				...(payload.variant === "Post" && { postId: payload.id }),
+				...(payload.variant === "Comment" && { replyToId: payload.id }),
 				authorId: session.user.id,
 				content: payload.content,
-				...(payload.postId !== undefined && { postId: payload.postId }),
-				...(payload.replyToId !== undefined && { replyToId: payload.replyToId }),
 			},
 		});
 
@@ -185,16 +185,16 @@ export async function createComment(payload: CommentCreationRequest): Promise<Ac
 }
 
 interface LoadCommentsParams {
-	postId?: string;
-	replyToId?: string;
+	id: string;
+	variant: "Post" | "Comment";
 	page?: number;
 }
 
-export async function loadComments({ postId, replyToId, page = 0 }: LoadCommentsParams) {
+export async function loadComments({ id, variant, page = 0 }: LoadCommentsParams) {
 	return await db.comment.findMany({
 		where: {
-			...(postId !== undefined && { postId }),
-			...(postId === undefined && { replyToId }),
+			...(variant === "Post" && { postId: id }),
+			...(variant === "Comment" && { replyToId: id }),
 		},
 		include: {
 			author: true,

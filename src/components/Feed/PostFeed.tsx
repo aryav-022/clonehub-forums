@@ -30,7 +30,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 				});
 
 				if (!morePosts || morePosts.length === 0) {
-					entry?.target?.remove();
+					entry.target.classList.add("hidden");
 
 					toast({
 						title: "No more posts",
@@ -41,7 +41,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 				}
 			})();
 		}
-	}, [entry, posts, where]);
+	}, [entry, posts, where, toast]);
 
 	return (
 		<>

@@ -87,12 +87,14 @@ const ChangeProfilePicture: FC<ChangeProfilePictureProps> = ({ user }) => {
 			});
 		}
 
-		inputRef.current?.addEventListener("change", handleChange);
+		const input = inputRef.current;
+
+		input?.addEventListener("change", handleChange);
 
 		return () => {
-			inputRef.current?.removeEventListener("change", handleChange);
+			input?.removeEventListener("change", handleChange);
 		};
-	}, []);
+	}, [router, toast, setOptimisticImage]);
 
 	return (
 		<div className="flex gap-4">

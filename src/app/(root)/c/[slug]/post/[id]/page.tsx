@@ -50,8 +50,6 @@ const Page = async ({ params: { id } }: PageProps) => {
 		return acc;
 	}, 0);
 
-	const comments = await loadComments({ postId: id });
-
 	return (
 		<div className="col-span-5 my-4 space-y-4 lg:col-span-3">
 			<Link href={`/c/${post.community.name}`} className={buttonVariants({ variant: "ghost" })}>
@@ -68,7 +66,7 @@ const Page = async ({ params: { id } }: PageProps) => {
 					</div>
 				</section>
 
-				<CommentSection session={session} post={post} initialComments={comments} />
+				<CommentSection session={session} post={post} />
 			</main>
 		</div>
 	);

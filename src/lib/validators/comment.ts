@@ -1,10 +1,9 @@
 import { z } from "zod";
 
 export const CommentValidator = z.object({
-	authorId: z.string(),
+	id: z.string(),
+	variant: z.ZodEnum.create(["Post", "Comment"]),
 	content: z.string(),
-	postId: z.string().optional(),
-	replyToId: z.string().optional(),
 });
 
 export type CommentCreationRequest = z.infer<typeof CommentValidator>;
