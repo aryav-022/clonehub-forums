@@ -8,6 +8,7 @@ import { loadPosts } from "@/lib/actions";
 import { POSTS_PER_PAGE } from "@/config";
 import { useToast } from "../ui/Toast";
 import type { Session } from "next-auth";
+import { Show } from "@/lib/utils";
 
 interface PostFeedProps {
 	initialPosts: ExtendedPost[];
@@ -17,12 +18,13 @@ interface PostFeedProps {
 
 const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 	const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts);
+	const [shouldLoad, setShouldLoad] = useState(true);
 	const toast = useToast();
 
 	const { ref, entry } = useIntersection();
 
 	useEffect(() => {
-		if (entry?.isIntersecting) {
+		if (shouldLoad && entry?.isIntersecting) {
 			(async () => {
 				const morePosts = await loadPosts({
 					where,
@@ -30,7 +32,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 				});
 
 				if (!morePosts || morePosts.length === 0) {
-					entry.target.classList.add("hidden");
+					setShouldLoad(false);
 
 					toast({
 						title: "No more posts",
@@ -41,7 +43,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 				}
 			})();
 		}
-	}, [entry, posts, where, toast]);
+	}, [entry, posts, where, toast, shouldLoad, setShouldLoad]);
 
 	return (
 		<>
@@ -49,7 +51,9 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
 				<PostCard key={post.id} post={post} session={session} />
 			))}
 
-			<PostPlaceholder ref={ref} />
+			<Show If={shouldLoad}>
+				<PostPlaceholder ref={ref} />
+			</Show>
 		</>
 	);
 };

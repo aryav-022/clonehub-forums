@@ -29,12 +29,13 @@ interface CommentsProps {
 
 const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) => {
 	const [comments, setComments] = useState<ExtendedComments[]>(initialComments);
+	const [shouldLoad, setShouldLoad] = useState<boolean>(true);
 
 	const { ref, entry } = useIntersection();
 	const toast = useToast();
 
 	useEffect(() => {
-		if (entry?.isIntersecting) {
+		if (shouldLoad && entry?.isIntersecting) {
 			(async () => {
 				const moreComments = await loadComments({
 					id,
@@ -43,7 +44,7 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 				});
 
 				if (!moreComments || moreComments.length === 0) {
-					entry.target.classList.add("hidden");
+					setShouldLoad(false);
 
 					toast({
 						title: "No more comments",
@@ -54,7 +55,7 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 				}
 			})();
 		}
-	}, [entry, comments, id, variant, setComments, toast]);
+	}, [entry, comments, id, variant, setComments, toast, shouldLoad, setShouldLoad]);
 
 	function addComment(comment: ExtendedComments) {
 		setComments((prev) => [comment, ...prev]);
@@ -75,7 +76,9 @@ const Comments: FC<CommentsProps> = ({ id, session, variant, initialComments }) 
 					))}
 				</Show>
 
-				<CommentPlaceholder ref={ref} />
+				<Show If={shouldLoad}>
+					<CommentPlaceholder ref={ref} />
+				</Show>
 			</ul>
 		</>
 	);

@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { COMMUNITIES_PER_PAGE } from "@/config";
 import Image from "next/image";
 import Link from "next/link";
+import type { Community } from "@prisma/client";
+import { Show } from "@/lib/utils";
 
 interface CustomFeedProps {
 	session: Session;
@@ -25,8 +27,12 @@ const CustomFeed = async ({ session }: CustomFeedProps) => {
 
 	return (
 		<>
-			{posts.length === 0 && <CommunitySuggestion />}
-			<PostFeed initialPosts={posts} where={where} session={session} />
+			<Show If={posts.length === 0}>
+				<CommunitySuggestion />
+			</Show>
+			<Show Else={posts.length === 0}>
+				<PostFeed initialPosts={posts} where={where} session={session} />
+			</Show>
 		</>
 	);
 };
@@ -45,6 +51,9 @@ async function CommunitySuggestion() {
 					_count: "desc",
 				},
 			},
+			{
+				createdAt: "asc",
+			},
 		],
 	});
 
@@ -55,24 +64,30 @@ async function CommunitySuggestion() {
 
 			<ul className="flex flex-wrap gap-4 py-4">
 				{communities.map((community) => (
-					<li key={community.id}>
-						<Link
-							className="flex h-40 w-40 cursor-pointer flex-col justify-between gap-2 rounded-lg bg-neutral-100 p-4 hover:bg-neutral-200"
-							href={`/c/${community.name}`}
-						>
-							<div className="mx-auto grid h-20 w-20 place-items-center overflow-hidden rounded-full">
-								{community.image ? (
-									<Image src={community.image} alt={community.name} width={80} height={80} />
-								) : (
-									<div className="h-20 w-20 bg-neutral-800" />
-								)}
-							</div>
-							<h2 className="text-center text-lg font-bold">c/{community.name}</h2>
-						</Link>
-					</li>
+					<CommunityCard key={community.id} community={community} />
 				))}
 			</ul>
 		</div>
+	);
+}
+
+function CommunityCard({ community }: { community: Community }) {
+	return (
+		<li>
+			<Link
+				className="flex h-40 w-40 cursor-pointer flex-col justify-between gap-2 rounded-lg bg-neutral-100 p-4 hover:bg-neutral-200"
+				href={`/c/${community.name}`}
+			>
+				<div className="mx-auto grid h-20 w-20 place-items-center overflow-hidden rounded-full">
+					{community.image ? (
+						<Image src={community.image} alt={community.name} width={80} height={80} />
+					) : (
+						<div className="h-20 w-20 bg-neutral-800" />
+					)}
+				</div>
+				<h2 className="text-center text-lg font-bold">c/{community.name}</h2>
+			</Link>
+		</li>
 	);
 }
 
