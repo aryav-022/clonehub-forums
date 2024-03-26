@@ -99,9 +99,11 @@ function CommunityCard({ community, session }: { community: Community; session: 
 					<Controllers community={community} session={session} size="xs" />
 				</div>
 
-				<Paragraph lineClamp="line-clamp-3" className="text-sm">
-					{community.description}
-				</Paragraph>
+				<Show If={community.description?.length !== 0}>
+					<Paragraph lineClamp="line-clamp-3" className="text-sm">
+						{community.description}
+					</Paragraph>
+				</Show>
 			</div>
 		</li>
 	);
