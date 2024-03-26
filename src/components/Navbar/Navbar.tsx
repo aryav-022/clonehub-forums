@@ -13,7 +13,7 @@ const Navbar = async () => {
 	const notifications = session ? await loadNotifications(session.user.id) : [];
 
 	return (
-		<nav className="sticky top-0 z-30 flex h-14 w-screen items-center justify-between gap-4 border-b bg-white px-4 py-2 sm:gap-8 sm:px-8 md:gap-32">
+		<nav className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-white px-4 py-2 sm:gap-8 sm:px-8 md:gap-32">
 			<Link href="/" className="flex">
 				<Icons.logo /> &nbsp;
 				<h1 className="text-md font-bold max-sm:hidden sm:text-nowrap md:text-lg">
