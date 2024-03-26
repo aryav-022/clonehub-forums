@@ -100,24 +100,23 @@ function NotificationCard({ notification }: { notification: ExtendedNotification
 }
 
 function NotificationMessage({ notification }: { notification: ExtendedNotification }) {
-	switch (notification.type) {
-		case "MENTIONED":
-			return (
-				<p>
-					<Link
-						href={`/u/${notification.userTriggered.username}`}
-						className="font-semibold text-orange-500"
-					>
-						{notification.userTriggered.username}
-					</Link>{" "}
-					mentioned you in a comment
-				</p>
-			);
-		case "POST_UPVOTED":
-			return `${notification.userTriggered.username} replied to your comment`;
-		case "COMMENT_UPVOTED":
-			return `${notification.userTriggered.username} liked your comment`;
-	}
+	const messages = {
+		MENTIONED: "mentioned you in a comment",
+		POST_UPVOTED: "upvoted your post",
+		COMMENT_UPVOTED: "upvoted your comment",
+	};
+
+	return (
+		<p>
+			<Link
+				href={`/u/${notification.userTriggered.username}`}
+				className="font-semibold text-orange-500"
+			>
+				{notification.userTriggered.username}
+			</Link>{" "}
+			{messages[notification.type]}
+		</p>
+	);
 }
 
 export default NotificationMenu;
