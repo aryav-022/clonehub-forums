@@ -1,8 +1,9 @@
 "use client";
 
 import { createComment, getSuggestions } from "@/lib/actions";
-import { cn, debounce } from "@/lib/utils";
+import { debounce } from "@/lib/utils";
 import { CommentValidator, type CommentCreationRequest } from "@/lib/validators/comment";
+import type { User } from "@prisma/client";
 import type { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -11,7 +12,6 @@ import { ZodError } from "zod";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import type { ExtendedComment } from "./Comments";
-import type { User } from "@prisma/client";
 
 interface CommentFormProps {
 	postId: string;
@@ -128,8 +128,8 @@ export default function CommentForm({
 	}
 
 	return (
-		<form ref={formRef} action={handleSubmit} className={cn({ flex: variant === "Comment" })}>
-			<div className="group relative">
+		<form ref={formRef} action={handleSubmit}>
+			<div className="group relative h-full w-full">
 				<textarea
 					ref={inputRef}
 					name="comment"
@@ -137,12 +137,7 @@ export default function CommentForm({
 					required
 					placeholder="Write your thoughts..."
 					rows={variant === "Post" ? 3 : 1}
-					className={cn(
-						"relative w-full resize-none rounded-lg border px-2 py-1 focus:outline-none focus:ring-2",
-						{
-							"rounded-r-none": variant === "Comment",
-						}
-					)}
+					className="relative m-0 h-full w-full resize-none overflow-auto rounded-lg border p-2 focus:outline-none focus:ring-2"
 					defaultValue={author ? `@${author} ` : ""}
 					onInput={detectMentions}
 				></textarea>
@@ -165,21 +160,16 @@ export default function CommentForm({
 				)}
 			</div>
 
-			<SubmitButton variant={variant} />
+			<SubmitButton />
 		</form>
 	);
 }
 
-function SubmitButton({ variant }: { variant: "Post" | "Comment" }) {
+function SubmitButton() {
 	const { pending } = useFormStatus();
 
 	return (
-		<Button
-			type="submit"
-			aria-disabled={pending}
-			isLoading={pending}
-			className={cn({ "rounded-l-none": variant === "Comment" })}
-		>
+		<Button type="submit" aria-disabled={pending} isLoading={pending}>
 			Comment
 		</Button>
 	);
