@@ -50,7 +50,7 @@ const Page = async ({ params: { id }, searchParams: { comment } }: PageProps) =>
 		if (vote.type === "UP") return acc + 1;
 		if (vote.type === "DOWN") return acc - 1;
 		return acc;
-	}, 0);
+	}, 0) || 0;
 
 	return (
 		<div className="col-span-5 my-4 space-y-4 lg:col-span-3">

@@ -1,15 +1,15 @@
 "use client";
 
-import type { Session } from "next-auth";
-import Paragraph from "../Header/Paragraph";
-import type { ExtendedComment } from "./Comments";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { Show, cn, isValidUrl, timeFromNow } from "@/lib/utils";
+import { MessageSquare } from "lucide-react";
+import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import Paragraph from "../Header/Paragraph";
 import VoteCard from "../VoteCard";
 import { Button } from "../ui/Button";
-import { MessageSquare } from "lucide-react";
+import type { ExtendedComment } from "./Comments";
 import Comments from "./Comments";
 
 export default function CommentCard({
@@ -28,8 +28,8 @@ export default function CommentCard({
 
 	let currVote: -1 | 0 | 1 = 0;
 
-	const initialVotes = useMemo(() => {
-		return comment.commentVotes?.reduce((acc, vote) => {
+	const initialVotes =
+		comment.commentVotes?.reduce((acc, vote) => {
 			if (vote.userId === session?.user.id) {
 				if (vote.type === "UP") currVote = 1;
 				if (vote.type === "DOWN") currVote = -1;
@@ -38,8 +38,7 @@ export default function CommentCard({
 			if (vote.type === "UP") return acc + 1;
 			else if (vote.type === "DOWN") return acc - 1;
 			return acc;
-		}, 0);
-	}, [comment, session]);
+		}, 0) || 0;
 
 	useEffect(() => {
 		if (highlighted) {

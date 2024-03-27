@@ -28,7 +28,7 @@ const PostCard: FC<PostCardProps> = ({ post, session }) => {
 		if (vote.type === "UP") return acc + 1;
 		if (vote.type === "DOWN") return acc - 1;
 		return acc;
-	}, 0);
+	}, 0) || 0;
 
 	return (
 		<div className="overflow-hidden rounded-lg">
