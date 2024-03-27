@@ -1,13 +1,13 @@
 "use client";
 
 import { timeFromNow } from "@/lib/utils";
+import { ExtendedPost } from "@/types/prisma";
 import { MessageSquare } from "lucide-react";
+import type { Session } from "next-auth";
 import Link from "next/link";
 import { FC, useRef } from "react";
-import VoteCard from "./VoteCard";
-import { ExtendedPost } from "@/types/prisma";
 import EditorOutput from "./Editor/EditorOutput";
-import type { Session } from "next-auth";
+import VoteCard from "./VoteCard";
 
 interface PostCardProps {
 	post: ExtendedPost;

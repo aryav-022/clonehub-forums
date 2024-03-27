@@ -15,6 +15,8 @@ interface PageProps {
 	searchParams: { [key: string]: string | string[] | undefined };
 }
 
+export const dynamic = "force-dynamic";
+
 const Page = async ({ params: { id }, searchParams: { comment } }: PageProps) => {
 	const post = await db.post.findUnique({
 		where: { id },

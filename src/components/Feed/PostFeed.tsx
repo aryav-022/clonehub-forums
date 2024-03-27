@@ -1,14 +1,12 @@
 "use client";
 
-import { ExtendedPost } from "@/types/prisma";
-import React, { FC, useEffect, useState } from "react";
-import PostCard from "../PostCard";
-import { useIntersection } from "@mantine/hooks";
+import { useInfiniteScroll } from "@/hooks/useInfintieScroll";
 import { loadPosts } from "@/lib/actions";
-import { POSTS_PER_PAGE } from "@/config";
-import { useToast } from "../ui/Toast";
-import type { Session } from "next-auth";
 import { Show } from "@/lib/utils";
+import { ExtendedPost } from "@/types/prisma";
+import type { Session } from "next-auth";
+import React, { FC } from "react";
+import PostCard from "../PostCard";
 
 interface PostFeedProps {
 	initialPosts: ExtendedPost[];
@@ -17,33 +15,11 @@ interface PostFeedProps {
 }
 
 const PostFeed: FC<PostFeedProps> = ({ initialPosts, where, session }) => {
-	const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts);
-	const [shouldLoad, setShouldLoad] = useState(true);
-	const toast = useToast();
+	function loadMore(page: number) {
+		return loadPosts({ where, page });
+	}
 
-	const { ref, entry } = useIntersection();
-
-	useEffect(() => {
-		if (shouldLoad && entry?.isIntersecting) {
-			(async () => {
-				const morePosts = await loadPosts({
-					where,
-					page: posts.length / POSTS_PER_PAGE,
-				});
-
-				if (!morePosts || morePosts.length === 0) {
-					setShouldLoad(false);
-
-					toast({
-						title: "No more posts",
-						message: "You have reached the end of the feed.",
-					});
-				} else {
-					setPosts((prevPosts) => [...prevPosts, ...morePosts]);
-				}
-			})();
-		}
-	}, [entry, posts, where, toast, shouldLoad, setShouldLoad]);
+	const { data: posts, ref, shouldLoad } = useInfiniteScroll<ExtendedPost>(initialPosts, loadMore);
 
 	return (
 		<>

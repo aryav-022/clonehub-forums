@@ -1,10 +1,11 @@
 "use client";
 
+import { voteComment, votePost } from "@/lib/actions";
+import { cn, type ActionResponse } from "@/lib/utils";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FC, startTransition, useOptimistic, useState } from "react";
 import { Button } from "./ui/Button";
-import { type ActionResponse, cn } from "@/lib/utils";
-import { voteComment, votePost } from "@/lib/actions";
 import { useToast } from "./ui/Toast";
 
 interface VoteCardProps {
@@ -18,6 +19,7 @@ const VoteCard: FC<VoteCardProps> = ({ id, initialVotes, currVote, horizontal })
 	const recordVote = horizontal ? voteComment : votePost;
 
 	const toast = useToast();
+	const router = useRouter();
 
 	const [isUpVoted, setIsUpVoted] = useState<-1 | 0 | 1>(currVote);
 	const [optimisticIsUpVoted, setOptimisticIsUpVoted] = useOptimistic<-1 | 0 | 1>(isUpVoted);
@@ -61,6 +63,8 @@ const VoteCard: FC<VoteCardProps> = ({ id, initialVotes, currVote, horizontal })
 				if (res.status === 200) {
 					setIsUpVoted(0);
 					setVotes((prev) => prev - vote);
+
+					router.refresh();
 				} else {
 					handleVoteError(res);
 				}

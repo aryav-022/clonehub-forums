@@ -20,7 +20,7 @@ interface CommentSectionProps {
 const CommentSection = async ({ post, session, commentId }: CommentSectionProps) => {
 	const initialComments = await loadComments({ id: post.id, variant: "Post" });
 
-	const _comment = commentId
+	const highlightedComment = commentId
 		? await db.comment.findUnique({
 				where: {
 					id: commentId instanceof Array ? commentId[0] : commentId,
@@ -34,11 +34,7 @@ const CommentSection = async ({ post, session, commentId }: CommentSectionProps)
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-xl font-medium">comments</h2>
-
-			<small className="flex items-center gap-2 text-sm">
-				<MessageSquare size={16} /> {post._count.comments} comments
-			</small>
+			<h2 className="text-xl font-medium">comments ({post._count.comments})</h2>
 
 			<hr />
 
@@ -47,7 +43,7 @@ const CommentSection = async ({ post, session, commentId }: CommentSectionProps)
 				session={session}
 				variant="Post"
 				initialComments={initialComments}
-				highlightedComment={_comment}
+				highlightedComment={highlightedComment}
 			/>
 		</section>
 	);
