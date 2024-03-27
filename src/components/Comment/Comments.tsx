@@ -14,6 +14,7 @@ import VoteCard from "../VoteCard";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import CommentForm from "./CommentForm";
+import Paragraph from "../Header/Paragraph";
 
 export type ExtendedComment = Comment & {
 	author: User;
@@ -188,7 +189,7 @@ function CommentCard({
 						&bull; {timeFromNow(comment.createdAt)}
 					</small>
 
-					<p>{formatContent(comment.content)}</p>
+					<Paragraph lineClamp="line-clamp-6">{formatContent(comment.content)}</Paragraph>
 				</div>
 			</div>
 
