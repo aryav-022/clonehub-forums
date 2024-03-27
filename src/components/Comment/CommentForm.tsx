@@ -112,7 +112,7 @@ export default function CommentForm({
 		setSuggestions(userSuggestions);
 	}, 500);
 
-	function useSuggestion(e: any) {
+	function acceptSuggestion(e: any) {
 		const commentInput = inputRef.current;
 
 		if (!commentInput) return;
@@ -156,7 +156,7 @@ export default function CommentForm({
 								className="block w-full cursor-pointer rounded-none p-2 text-orange-500"
 								variant="ghost"
 								type="button"
-								onClick={() => useSuggestion(user.username)}
+								onClick={() => acceptSuggestion(user.username)}
 							>
 								u/{user.username}
 							</Button>
