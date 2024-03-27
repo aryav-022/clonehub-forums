@@ -165,7 +165,9 @@ function CommentCard({
 
 	useEffect(() => {
 		if (highlighted) {
-			cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+			setTimeout(() => {
+				cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+			}, 1500);
 		}
 	}, [highlighted]);
 
