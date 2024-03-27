@@ -1,16 +1,17 @@
 "use client";
 
-import { createComment } from "@/lib/actions";
-import { cn } from "@/lib/utils";
+import { createComment, getSuggestions } from "@/lib/actions";
+import { cn, debounce } from "@/lib/utils";
 import { CommentValidator, type CommentCreationRequest } from "@/lib/validators/comment";
 import type { Session } from "next-auth";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { ZodError } from "zod";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import type { ExtendedComment } from "./Comments";
+import type { User } from "@prisma/client";
 
 interface CommentFormProps {
 	postId: string;
@@ -32,7 +33,10 @@ export default function CommentForm({
 	const toast = useToast();
 	const router = useRouter();
 
+	const [suggestions, setSuggestions] = useState<User[]>([]);
+
 	const formRef = useRef<HTMLFormElement | null>(null);
+	const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
 	async function handleSubmit(formData: FormData) {
 		if (!session) {
@@ -92,22 +96,74 @@ export default function CommentForm({
 		}
 	}
 
+	function detectMentions(e: any) {
+		const content = e.target.value;
+		const lastWord = content.split(" ").pop();
+
+		if (lastWord && lastWord.startsWith("@")) {
+			suggestMentions(lastWord.slice(1));
+		} else {
+			setSuggestions([]);
+		}
+	}
+
+	const suggestMentions = debounce(async (word: string) => {
+		const userSuggestions = await getSuggestions(word);
+		setSuggestions(userSuggestions);
+	}, 500);
+
+	function useSuggestion(e: any) {
+		const commentInput = inputRef.current;
+
+		if (!commentInput) return;
+
+		const content = commentInput.value;
+		const lastWord = content.split(" ").pop() as string;
+
+		const newContent = content.split(" ").slice(0, -1).join(" ") + ` @${e} `;
+		commentInput.value = newContent;
+
+		setSuggestions([]);
+		commentInput.focus();
+	}
+
 	return (
 		<form ref={formRef} action={handleSubmit} className={cn({ flex: variant === "Comment" })}>
-			<textarea
-				name="comment"
-				id="comment"
-				required
-				placeholder="Write your thoughts..."
-				rows={variant === "Post" ? 3 : 1}
-				className={cn(
-					"w-full resize-none rounded-lg border px-2 py-1 focus:outline-none focus:ring-2",
-					{
-						"rounded-r-none": variant === "Comment",
-					}
+			<div className="group relative">
+				<textarea
+					ref={inputRef}
+					name="comment"
+					id="comment"
+					required
+					placeholder="Write your thoughts..."
+					rows={variant === "Post" ? 3 : 1}
+					className={cn(
+						"relative w-full resize-none rounded-lg border px-2 py-1 focus:outline-none focus:ring-2",
+						{
+							"rounded-r-none": variant === "Comment",
+						}
+					)}
+					defaultValue={author ? `@${author} ` : ""}
+					onInput={detectMentions}
+				></textarea>
+
+				{/* add suggestions above @ if suggestions array isn't empty */}
+				{suggestions.length > 0 && (
+					<ul className="scrollbar-thin absolute z-10 hidden max-h-40 divide-y overflow-auto rounded-lg border bg-white shadow-md group-focus-within:block">
+						{suggestions.map((user) => (
+							<Button
+								key={user.id}
+								className="block w-full cursor-pointer rounded-none p-2 text-orange-500"
+								variant="ghost"
+								type="button"
+								onClick={() => useSuggestion(user.username)}
+							>
+								u/{user.username}
+							</Button>
+						))}
+					</ul>
 				)}
-				defaultValue={author ? `@${author} ` : ""}
-			></textarea>
+			</div>
 
 			<SubmitButton variant={variant} />
 		</form>

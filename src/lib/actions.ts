@@ -12,6 +12,7 @@ import {
 	NOTIFICATIONS_PER_PAGE,
 	POSTS_PER_PAGE,
 	SEARCH_RESULTS_LIMIT,
+	SUGGESTIONS_PER_REQUEST,
 } from "@/config";
 import { CommentCreationRequest } from "./validators/comment";
 import type { VoteType } from "@prisma/client";
@@ -572,5 +573,16 @@ export async function markAllNotificationsAsRead(userId: string) {
 		data: {
 			read: true,
 		},
+	});
+}
+
+export async function getSuggestions(username: string) {
+	return await db.user.findMany({
+		where: {
+			username: {
+				startsWith: username,
+			},
+		},
+		take: SUGGESTIONS_PER_REQUEST,
 	});
 }
