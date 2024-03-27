@@ -124,7 +124,7 @@ export function formatContent(content: string) {
 		} else if (isValidUrl(word)) {
 			return (
 				<>
-					<a key={word} href={word} className="font-medium text-blue-500">
+					<a target="_blank" key={word} href={word} className="font-medium text-blue-500">
 						{word}
 					</a>{" "}
 				</>
