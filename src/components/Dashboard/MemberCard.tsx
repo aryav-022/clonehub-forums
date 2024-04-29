@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FC } from "react";
+import { FC, startTransition } from "react";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
 import { useRouter } from "next/navigation";
@@ -36,7 +36,7 @@ const MemberCard: FC<MemberCardProps> = ({ communityId, member, isCreator = fals
 						message: res.message,
 						variant: "success",
 					});
-					router.refresh();
+					startTransition(() => router.refresh());
 					break;
 				case 401:
 					toast({
