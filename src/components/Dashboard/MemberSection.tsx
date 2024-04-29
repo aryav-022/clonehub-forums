@@ -31,6 +31,10 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 		setSearchQuery(query);
 	}
 
+	function removeMemberFromList(id: string) {
+		setMembers((prev) => prev.filter((member) => member.id !== id));
+	}
+
 	useEffect(reset, [searchQuery]);
 
 	return (
@@ -53,6 +57,7 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 						communityId={community.id}
 						member={member}
 						isCreator={member.id === community.creatorId}
+						removeMemberFromList={removeMemberFromList}
 					/>
 				))}
 

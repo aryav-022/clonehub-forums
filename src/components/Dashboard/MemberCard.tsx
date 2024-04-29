@@ -19,11 +19,16 @@ interface MemberCardProps {
 	communityId: string;
 	member: Member;
 	isCreator: boolean;
+	removeMemberFromList: (id: string) => void;
 }
 
-const MemberCard: FC<MemberCardProps> = ({ communityId, member, isCreator = false }) => {
+const MemberCard: FC<MemberCardProps> = ({
+	communityId,
+	member,
+	isCreator = false,
+	removeMemberFromList,
+}) => {
 	const toast = useToast();
-	const router = useRouter();
 
 	async function remove() {
 		try {
@@ -36,7 +41,9 @@ const MemberCard: FC<MemberCardProps> = ({ communityId, member, isCreator = fals
 						message: res.message,
 						variant: "success",
 					});
-					startTransition(() => router.refresh());
+
+					removeMemberFromList(member.id);
+
 					break;
 				case 401:
 					toast({
