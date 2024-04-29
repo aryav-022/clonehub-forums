@@ -28,5 +28,11 @@ export function useInfiniteScroll<T>(
 		}
 	}, [entry, shouldLoad, loadMore, setData, setShouldLoad, setPage, page]);
 
-	return { ref, data, setData, shouldLoad, setShouldLoad };
+	function reset() {
+		setData(initialData);
+		setShouldLoad(true);
+		setPage(0);
+	}
+
+	return { ref, data, setData, shouldLoad, setShouldLoad, reset };
 }

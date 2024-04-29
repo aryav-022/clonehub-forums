@@ -12,7 +12,7 @@ const Searchbar: FC<SearchbarProps> = ({ setQuery }) => {
 	const searchMembers = debounce((e) => {
 		const searchQuery = e.target.value;
 		setQuery(searchQuery);
-	});
+	}, 500);
 
 	return (
 		<div className="flex w-full items-center overflow-hidden rounded-md border border-neutral-300 focus-within:ring-2">

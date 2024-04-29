@@ -6,6 +6,7 @@ import MemberCard, { Member } from "./MemberCard";
 import type { Community } from "@prisma/client";
 import { loadMembers } from "@/lib/actions";
 import { useInfiniteScroll } from "@/hooks/useInfintieScroll";
+import { Show } from "@/lib/utils";
 
 interface MemberSectionProps {
 	community: Community;
@@ -23,17 +24,14 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 		data: members,
 		setData: setMembers,
 		shouldLoad,
-		setShouldLoad,
+		reset,
 	} = useInfiniteScroll<Member>([], loadMore);
 
 	function setQuery(query: string) {
 		setSearchQuery(query);
 	}
 
-	useEffect(() => {
-		setMembers([]);
-		setShouldLoad(true);
-	}, [searchQuery]);
+	useEffect(reset, [searchQuery]);
 
 	return (
 		<section className="space-y-4 py-4">
@@ -58,13 +56,13 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 					/>
 				))}
 
-				{shouldLoad && (
+				<Show If={shouldLoad}>
 					<li
 						ref={loaderRef}
 						aria-description="loader"
 						className="my-2 h-8 w-full animate-pulse rounded-md bg-neutral-100 px-4"
 					></li>
-				)}
+				</Show>
 			</ul>
 		</section>
 	);
