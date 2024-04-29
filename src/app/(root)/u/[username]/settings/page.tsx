@@ -31,9 +31,9 @@ const Page = async ({ params: { username } }: PageProps) => {
 					<li>
 						<ChangeUsername user={user} />
 					</li>
-					<li className="flex lg:gap-2">
+					<li className="flex flex-col gap-2">
 						<h3 className="text-sm font-medium">Change Profile Picture</h3>
-						<ChangeProfilePicture user={user} />
+						<ChangeProfilePicture image={user.image} />
 					</li>
 				</ul>
 			</div>

@@ -1,21 +1,22 @@
 "use server";
 
-import { getAuthSession } from "@/lib/auth";
-import { uploadFile } from "@/lib/cloudinary";
-import { ActionResponse } from "@/lib/utils";
-import { ZodError } from "zod";
-import { db } from "./db";
-import { CommunityValidator } from "./validators/community";
-import { PostCreationRequest } from "./validators/post";
 import {
 	COMMENTS_PER_POST,
+	MEMBERS_PER_PAGE,
 	NOTIFICATIONS_PER_PAGE,
 	POSTS_PER_PAGE,
 	SEARCH_RESULTS_LIMIT,
 	SUGGESTIONS_PER_REQUEST,
 } from "@/config";
-import { CommentCreationRequest } from "./validators/comment";
+import { getAuthSession } from "@/lib/auth";
+import { uploadFile } from "@/lib/cloudinary";
+import { ActionResponse } from "@/lib/utils";
 import type { VoteType } from "@prisma/client";
+import { ZodError } from "zod";
+import { db } from "./db";
+import { CommentCreationRequest } from "./validators/comment";
+import { CommunityValidator } from "./validators/community";
+import { PostCreationRequest } from "./validators/post";
 
 export async function createCommunity(formData: FormData): Promise<ActionResponse> {
 	try {
@@ -585,4 +586,158 @@ export async function getSuggestions(username: string) {
 		},
 		take: SUGGESTIONS_PER_REQUEST,
 	});
+}
+
+export async function updateCommunity(formData: FormData) {
+	try {
+		const data = Object.fromEntries(formData);
+
+		const { communityName, description, image, banner } = CommunityValidator.parse(data);
+
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to update a community.");
+		}
+
+		// check if community with the same name already exists
+		const community = await db.community.findFirst({
+			where: {
+				name: {
+					equals: communityName,
+					mode: "insensitive",
+				},
+			},
+		});
+
+		if (!community) {
+			return ActionResponse(404, "Community not found.");
+		}
+
+		// upload image and banner to cloudinary
+		let imageUrl = null,
+			bannerUrl = null;
+		if (image?.size > 0) {
+			const formData = new FormData();
+			formData.append("file", image);
+
+			const { url: _imageUrl, status: imageStatus } = await uploadFile(formData);
+
+			if (imageStatus === 0) {
+				return ActionResponse(500, "An error occurred while uploading the image.");
+			}
+
+			imageUrl = _imageUrl;
+		}
+
+		if (banner?.size > 0) {
+			const formData = new FormData();
+			formData.append("file", banner);
+
+			const { url: _bannerUrl, status: bannerStatus } = await uploadFile(formData);
+
+			if (bannerStatus === 0) {
+				return ActionResponse(500, "An error occurred while uploading the banner.");
+			}
+
+			bannerUrl = _bannerUrl;
+		}
+
+		await db.community.update({
+			where: { id: community.id },
+			data: {
+				name: communityName,
+				description: description || null,
+				banner: bannerUrl,
+				image: imageUrl,
+			},
+		});
+
+		return ActionResponse(200, "Community Updated successfully.");
+	} catch (error) {
+		if (error instanceof ZodError) {
+			return ActionResponse(400, error.errors[0].message);
+		}
+
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
+}
+
+export async function loadMembers(id: string, page = 0, query = "") {
+	return await db.user.findMany({
+		where: {
+			joinedCommunities: {
+				some: {
+					id,
+				},
+			},
+			OR: [
+				{
+					username: {
+						contains: query,
+						mode: "insensitive",
+					},
+				},
+				{
+					name: {
+						contains: query,
+						mode: "insensitive",
+					},
+				},
+			],
+		},
+		select: {
+			id: true,
+			name: true,
+			username: true,
+			image: true,
+		},
+		take: MEMBERS_PER_PAGE,
+		skip: page * MEMBERS_PER_PAGE,
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+}
+
+export async function removeMember(communityId: string, memberId: string) {
+	try {
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to remove a member.");
+		}
+
+		const community = await db.community.findFirst({
+			where: {
+				id: communityId,
+				members: {
+					some: {
+						id: memberId,
+					},
+				},
+			},
+		});
+
+		if (!community) {
+			return ActionResponse(404, "Either the community or the member was not found.");
+		}
+
+		if (community.creatorId === session.user.id) {
+			return ActionResponse(403, "Creators cannot be removed from the community");
+		}
+
+		await db.community.update({
+			where: { id: community.id },
+			data: {
+				members: {
+					disconnect: { id: memberId },
+				},
+			},
+		});
+
+		return ActionResponse(200, "Member removed successfully.");
+	} catch (error) {
+		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
 }

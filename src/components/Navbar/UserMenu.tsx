@@ -17,7 +17,7 @@ const UserMenu: FC<UserMenuProps> = ({ user }) => {
 	return (
 		<div className="group relative flex h-full items-center">
 			<button className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full">
-				<Image src={user.image || ""} alt="profile" height={40} width={40} />
+				<Image src={user.image || ""} alt="profile" fill className="object-cover" />
 			</button>
 
 			<menu
