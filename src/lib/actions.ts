@@ -723,8 +723,12 @@ export async function removeMember(communityId: string, memberId: string) {
 			return ActionResponse(404, "Either the community or the member was not found.");
 		}
 
-		if (community.creatorId === session.user.id) {
-			return ActionResponse(403, "Creators cannot be removed from the community");
+		if (community.creatorId !== session.user.id) {
+			return ActionResponse(403, "You are not authorized to remove members from this community.");
+		}
+
+		if (community.creatorId === memberId) {
+			return ActionResponse(403, "You cannot remove the creator of the community.");
 		}
 
 		await db.community.update({
