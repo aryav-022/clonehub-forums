@@ -41,6 +41,15 @@ const CustomFeed = async ({ session }: CustomFeedProps) => {
 
 async function CommunitySuggestion({ session }: CustomFeedProps) {
 	const communities = await db.community.findMany({
+		where: {
+			NOT: {
+				banned: {
+					some: {
+						id: session.user.id,
+					},
+				},
+			},
+		},
 		take: COMMUNITIES_PER_PAGE,
 		orderBy: [
 			{

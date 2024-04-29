@@ -5,10 +5,11 @@ import { Search } from "lucide-react";
 import { FC } from "react";
 
 interface SearchbarProps {
+	type: "members" | "banned users";
 	setQuery: (query: string) => void;
 }
 
-const Searchbar: FC<SearchbarProps> = ({ setQuery }) => {
+const Searchbar: FC<SearchbarProps> = ({ type, setQuery }) => {
 	const searchMembers = debounce((e) => {
 		const searchQuery = e.target.value;
 		setQuery(searchQuery);
@@ -19,7 +20,7 @@ const Searchbar: FC<SearchbarProps> = ({ setQuery }) => {
 			<Search size={18} className="mx-4 text-neutral-400" />
 			<input
 				type="text"
-				placeholder="Search members"
+				placeholder={`Search ${type}`}
 				className="inline-block w-full py-2 outline-none"
 				onInput={searchMembers}
 			/>

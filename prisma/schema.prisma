@@ -54,6 +54,8 @@ model User {
 
     Notifications          Notification[] @relation("Notifications")
     NotificationsTriggered Notification[] @relation("NotificationsTriggered")
+
+    communitiesBannedFrom Community[] @relation("BannedCommunities")
 }
 
 model VerificationRequest {
@@ -82,6 +84,8 @@ model Community {
     members User[] @relation("JoinedCommunities")
 
     posts Post[]
+
+    banned User[] @relation("BannedCommunities")
 
     @@index([name])
     @@map("Communities")

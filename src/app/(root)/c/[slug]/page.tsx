@@ -12,12 +12,23 @@ interface PageProps {
 }
 
 const Page = async ({ params: { slug } }: PageProps) => {
+	const session = await getAuthSession();
+
 	const community = await db.community.findFirst({
 		where: {
 			name: {
 				equals: slug,
 				mode: "insensitive",
 			},
+			...(session && {
+				NOT: {
+					banned: {
+						some: {
+							id: session.user.id,
+						},
+					},
+				},
+			}),
 		},
 		include: {
 			_count: {
@@ -27,8 +38,6 @@ const Page = async ({ params: { slug } }: PageProps) => {
 	});
 
 	if (!community) return notFound();
-
-	const session = await getAuthSession();
 
 	const where = { communityId: community.id };
 

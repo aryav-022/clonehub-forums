@@ -39,18 +39,34 @@ const Page = async ({ params: { id }, searchParams: { comment } }: PageProps) =>
 
 	const session = await getAuthSession();
 
+	if (session) {
+		const isBanned = await db.community.findFirst({
+			where: {
+				id: post.communityId,
+				banned: {
+					some: {
+						id: session.user.id,
+					},
+				},
+			},
+		});
+
+		if (isBanned) return notFound();
+	}
+
 	let currVote: -1 | 0 | 1 = 0;
 
-	const initialVotes = post.votes.reduce((acc, vote) => {
-		if (vote.userId === session?.user.id) {
-			if (vote.type === "UP") currVote = 1;
-			if (vote.type === "DOWN") currVote = -1;
-		}
+	const initialVotes =
+		post.votes.reduce((acc, vote) => {
+			if (vote.userId === session?.user.id) {
+				if (vote.type === "UP") currVote = 1;
+				if (vote.type === "DOWN") currVote = -1;
+			}
 
-		if (vote.type === "UP") return acc + 1;
-		if (vote.type === "DOWN") return acc - 1;
-		return acc;
-	}, 0) || 0;
+			if (vote.type === "UP") return acc + 1;
+			if (vote.type === "DOWN") return acc - 1;
+			return acc;
+		}, 0) || 0;
 
 	return (
 		<div className="col-span-5 my-4 space-y-4 lg:col-span-3">

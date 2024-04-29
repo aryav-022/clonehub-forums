@@ -1,5 +1,6 @@
 import { CommunityForm } from "@/components/CommunityForm";
 import MemberSection from "@/components/Dashboard/MemberSection";
+import BannedUserSection from "@/components/Dashboard/BannedUserSection";
 import { updateCommunity } from "@/lib/actions";
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -49,6 +50,8 @@ async function Page({ params: { slug } }: PageProps) {
 			</section>
 
 			<MemberSection community={community} />
+
+			<BannedUserSection community={community} />
 		</main>
 	);
 }

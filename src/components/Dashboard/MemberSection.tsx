@@ -41,7 +41,7 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 		<section className="space-y-4 py-4">
 			<h2 className="text-xl font-semibold">Community Members</h2>
 
-			<Searchbar setQuery={setQuery} />
+			<Searchbar setQuery={setQuery} type="members" />
 
 			<ul className="flex flex-col divide-y">
 				<li className="grid grid-cols-4 items-center gap-2 rounded-md bg-neutral-200 px-4 py-2 font-medium">

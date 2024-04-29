@@ -110,6 +110,13 @@ export async function createPost(payload: PostCreationRequest): Promise<ActionRe
 					equals: payload.slug,
 					mode: "insensitive",
 				},
+				NOT: {
+					banned: {
+						some: {
+							id: session.user.id,
+						},
+					},
+				},
 			},
 		});
 
@@ -235,12 +242,23 @@ export async function loadComments({ id, variant, page = 0 }: LoadCommentsParams
 }
 
 export async function searchCommunities(query: string) {
+	const session = await getAuthSession();
+
 	return await db.community.findMany({
 		where: {
 			name: {
 				contains: query,
 				mode: "insensitive",
 			},
+			...(session && {
+				NOT: {
+					banned: {
+						some: {
+							id: session.user.id,
+						},
+					},
+				},
+			}),
 		},
 		orderBy: [
 			{
@@ -372,6 +390,18 @@ export async function joinCommunity(id: string) {
 		// Check if user is logged in
 		if (!session) {
 			return ActionResponse(401, "You must be logged in to join a community.");
+		}
+
+		// check if user is banned
+		const isBanned = await db.community.findFirst({
+			where: {
+				id,
+				banned: { some: { id: session.user.id } },
+			},
+		});
+
+		if (isBanned) {
+			return ActionResponse(403, "You are banned from this community.");
 		}
 
 		// Check if user is already a member
@@ -743,5 +773,150 @@ export async function removeMember(communityId: string, memberId: string) {
 		return ActionResponse(200, "Member removed successfully.");
 	} catch (error) {
 		return ActionResponse(500, "An unexpected error occurred. Please try again later.");
+	}
+}
+
+export async function banUser(communityId: string, userId: string) {
+	try {
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to ban a member.");
+		}
+
+		const community = await db.community.findUnique({
+			where: { id: communityId },
+		});
+
+		if (!community) {
+			return ActionResponse(404, "Community not found.");
+		}
+
+		if (community.creatorId !== session.user.id) {
+			return ActionResponse(403, "You are not authorized to ban users from this community.");
+		}
+
+		if (community.creatorId === userId) {
+			return ActionResponse(403, "You cannot ban the creator of the community.");
+		}
+
+		await db.community.update({
+			where: { id: community.id },
+			data: {
+				banned: {
+					connect: { id: userId },
+				},
+			},
+		});
+
+		await db.community.update({
+			where: { id: community.id },
+			data: {
+				members: {
+					disconnect: { id: userId },
+				},
+			},
+		});
+
+		return ActionResponse(200, "User banned successfully.");
+	} catch (error) {
+		return ActionResponse(500, "An unexpected server error occurred. Please try again later.");
+	}
+}
+
+export async function banUserByUsername(communityId: string, memberUsername: string) {
+	try {
+		const user = await db.user.findFirst({
+			where: { username: memberUsername },
+		});
+
+		if (!user) {
+			return ActionResponse(404, "User not found.");
+		}
+
+		return banUser(communityId, user.id);
+	} catch (error) {
+		return ActionResponse(500, "An unexpected server error occurred. Please try again later.");
+	}
+}
+
+export async function loadBannedUsers(id: string, page = 0, query = "") {
+	return await db.user.findMany({
+		where: {
+			communitiesBannedFrom: {
+				some: {
+					id,
+				},
+			},
+			OR: [
+				{
+					username: {
+						contains: query,
+						mode: "insensitive",
+					},
+				},
+				{
+					name: {
+						contains: query,
+						mode: "insensitive",
+					},
+				},
+			],
+		},
+		select: {
+			id: true,
+			name: true,
+			username: true,
+			image: true,
+		},
+		take: MEMBERS_PER_PAGE,
+		skip: page * MEMBERS_PER_PAGE,
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+}
+
+export async function unbanUser(communityId: string, userId: string) {
+	try {
+		const session = await getAuthSession();
+
+		if (!session) {
+			return ActionResponse(401, "You must be logged in to ban a member.");
+		}
+
+		const community = await db.community.findFirst({
+			where: {
+				id: communityId,
+				banned: {
+					some: { id: userId },
+				},
+			},
+		});
+
+		if (!community) {
+			return ActionResponse(404, "Either the community or the user was not banned.");
+		}
+
+		if (community.creatorId !== session.user.id) {
+			return ActionResponse(403, "You are not authorized to unban users from this community.");
+		}
+
+		await db.community.update({
+			where: { id: community.id },
+			data: {
+				banned: {
+					disconnect: { id: userId },
+				},
+			},
+		});
+
+		if (community.creatorId === userId) {
+			return ActionResponse(200, "Woah! How did you manage to ban the creator?");
+		}
+
+		return ActionResponse(200, "Member was unbanned successfully.");
+	} catch (error) {
+		return ActionResponse(500, "An unexpected server error occurred. Please try again later.");
 	}
 }

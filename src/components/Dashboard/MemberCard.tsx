@@ -1,12 +1,11 @@
 "use client";
 
+import { banUser, removeMember } from "@/lib/actions";
 import Image from "next/image";
-import { FC, startTransition } from "react";
+import { FC } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
-import { useRouter } from "next/navigation";
-import { removeMember } from "@/lib/actions";
-import { useFormStatus } from "react-dom";
 
 export interface Member {
 	id: string;
@@ -83,6 +82,59 @@ const MemberCard: FC<MemberCardProps> = ({
 		}
 	}
 
+	async function ban() {
+		try {
+			const res = await banUser(communityId, member.id);
+
+			switch (res.status) {
+				case 200:
+					toast({
+						title: "Success",
+						message: res.message,
+						variant: "success",
+					});
+
+					removeMemberFromList(member.id);
+
+					break;
+				case 401:
+					toast({
+						title: "Unauthorized",
+						message: res.message,
+						variant: "error",
+					});
+					break;
+				case 403:
+					toast({
+						title: "Forbidden",
+						message: res.message,
+						variant: "error",
+					});
+					break;
+				case 404:
+					toast({
+						title: "Not Found",
+						message: res.message,
+						variant: "error",
+					});
+					break;
+				default:
+					toast({
+						title: "Error",
+						message: res.message,
+						variant: "error",
+					});
+					break;
+			}
+		} catch (error) {
+			toast({
+				title: "Error",
+				message: "Unkown error occurred. Please try again later.",
+				variant: "error",
+			});
+		}
+	}
+
 	return (
 		<li className="grid grid-cols-4 items-center gap-2 p-2">
 			<div className="relative h-10 w-10 overflow-hidden rounded-full bg-neutral-800">
@@ -92,26 +144,43 @@ const MemberCard: FC<MemberCardProps> = ({
 			</div>
 			<span>{member.username}</span>
 			<span>{member.name}</span>
-			<form action={remove}>
-				<SubmitButton isCreator={isCreator} />
-			</form>
+			<div className="flex gap-x-2">
+				<form action={remove} className="flex-1">
+					<SubmitButton isCreator={isCreator} variant="subtle">
+						Remove
+					</SubmitButton>
+				</form>
+				<form action={ban} className="flex-1">
+					<SubmitButton isCreator={isCreator} variant="destructive">
+						Ban
+					</SubmitButton>
+				</form>
+			</div>
 		</li>
 	);
 };
 
-function SubmitButton({ isCreator }: { isCreator: boolean }) {
+function SubmitButton({
+	isCreator,
+	children,
+	variant,
+}: {
+	isCreator: boolean;
+	children: React.ReactNode;
+	variant: "default" | "link" | "destructive" | "outline" | "subtle" | "ghost" | null | undefined;
+}) {
 	const { pending } = useFormStatus();
 
 	return (
 		<Button
 			type="submit"
-			variant="subtle"
-			className="w-full text-red-500 hover:bg-red-500 hover:text-white"
+			variant={variant}
+			className="w-full"
 			disabled={isCreator}
 			isLoading={pending}
 			aria-disabled={pending || isCreator}
 		>
-			Remove
+			{children}
 		</Button>
 	);
 }
