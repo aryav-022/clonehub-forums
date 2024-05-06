@@ -41,7 +41,7 @@ const BannedUserSection: FC<BannedUserSectionProps> = ({ community }) => {
 		setBannedUsers((prev) => prev.filter((member) => member.id !== id));
 	}
 
-	useEffect(reset, [searchQuery]);
+	useEffect(reset, [searchQuery, reset]);
 
 	async function ban(formData: FormData) {
 		const username = formData.get("username") as string;
@@ -142,7 +142,6 @@ const BannedUserSection: FC<BannedUserSectionProps> = ({ community }) => {
 					<Show If={shouldLoad}>
 						<li
 							ref={loaderRef}
-							aria-description="loader"
 							className="my-2 h-8 w-full animate-pulse rounded-md bg-neutral-100 px-4"
 						></li>
 					</Show>

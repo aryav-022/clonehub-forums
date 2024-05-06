@@ -35,7 +35,7 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 		setMembers((prev) => prev.filter((member) => member.id !== id));
 	}
 
-	useEffect(reset, [searchQuery]);
+	useEffect(reset, [searchQuery, reset]);
 
 	return (
 		<section className="space-y-4 py-4">
@@ -64,7 +64,6 @@ const MemberSection: FC<MemberSectionProps> = ({ community }) => {
 				<Show If={shouldLoad}>
 					<li
 						ref={loaderRef}
-						aria-description="loader"
 						className="my-2 h-8 w-full animate-pulse rounded-md bg-neutral-100 px-4"
 					></li>
 				</Show>

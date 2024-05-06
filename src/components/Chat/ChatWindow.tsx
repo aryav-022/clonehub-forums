@@ -12,10 +12,8 @@ const ChatWindow = () => {
 	const formRef = useRef<HTMLFormElement | null>(null);
 	const messagesRef = useRef<HTMLUListElement | null>(null);
 
-	if (!selectedChat) return null;
-
-	const user = chats[selectedChat].user;
-	const messages = chats[selectedChat].messages || [];
+	const user = chats[selectedChat!].user;
+	const messages = chats[selectedChat!].messages || [];
 
 	async function sendMessage(formData: FormData) {
 		const content = formData.get("message") as string;
