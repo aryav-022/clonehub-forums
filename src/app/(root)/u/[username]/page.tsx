@@ -1,4 +1,5 @@
 import PostFeed from "@/components/Feed/PostFeed";
+import MessageButton from "@/components/User/MessageButton";
 import { loadPosts } from "@/lib/actions";
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -35,7 +36,7 @@ const Page = async ({ params: { username } }: PageProps) => {
 					{user.image && <Image src={user.image} alt={user.username!} height={200} width={200} />}
 				</div>
 
-				<div className="flex flex-col justify-between">
+				<div className="flex flex-col justify-between gap-4">
 					<div>
 						<h1 className="text-2xl font-medium max-md:text-center">u/{user.username}</h1>
 						<h2 className="text-lg font-medium max-md:text-center">{user.name}</h2>
@@ -51,6 +52,8 @@ const Page = async ({ params: { username } }: PageProps) => {
 							<dd>{user.createdCommunities.length}</dd>
 						</div>
 					</dl>
+
+					{(!session || session.user.id !== user.id) && <MessageButton to={user.id} />}
 
 					<div className="max-md:text-center">
 						Joined CloneHub on{" "}

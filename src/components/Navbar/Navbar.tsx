@@ -6,6 +6,7 @@ import NotificationMenu from "./NotificationMenu";
 import Searchbar from "./Searchbar";
 import UserMenu from "./UserMenu";
 import { loadNotifications } from "@/lib/actions";
+import ToggleChatBoxButton from "./ToggleChatBoxButton";
 
 const Navbar = async () => {
 	const session = await getAuthSession();
@@ -27,8 +28,8 @@ const Navbar = async () => {
 
 			{session ? (
 				<div className="flex items-center gap-2">
+					<ToggleChatBoxButton />
 					<NotificationMenu userId={session.user.id} initialNotifications={notifications} />
-
 					<UserMenu user={session.user} />
 				</div>
 			) : (

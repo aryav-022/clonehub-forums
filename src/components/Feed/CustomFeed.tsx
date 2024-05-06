@@ -19,7 +19,7 @@ const CustomFeed = async ({ session }: CustomFeedProps) => {
 		community: {
 			members: {
 				some: {
-					email: session.user.email,
+					id: session.user.id,
 				},
 			},
 		},

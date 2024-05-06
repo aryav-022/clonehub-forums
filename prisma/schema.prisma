@@ -56,6 +56,9 @@ model User {
     NotificationsTriggered Notification[] @relation("NotificationsTriggered")
 
     communitiesBannedFrom Community[] @relation("BannedCommunities")
+
+    sentMessages     Message[] @relation("from")
+    receivedMessages Message[] @relation("to")
 }
 
 model VerificationRequest {
@@ -181,4 +184,23 @@ model Notification {
 
     comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
     commentId String?
+}
+
+enum MessageState {
+    DELIVERED
+    SEEN
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+
+    from   User   @relation("from", fields: [fromId], references: [id], onDelete: Cascade)
+    fromId String
+
+    to   User   @relation("to", fields: [toId], references: [id], onDelete: Cascade)
+    toId String
+
+    content String
+    state   MessageState @default(DELIVERED)
 }

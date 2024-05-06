@@ -11,7 +11,7 @@ import {
 import { getAuthSession } from "@/lib/auth";
 import { uploadFile } from "@/lib/cloudinary";
 import { ActionResponse } from "@/lib/utils";
-import type { VoteType } from "@prisma/client";
+import type { Message, User, VoteType } from "@prisma/client";
 import { ZodError } from "zod";
 import { db } from "./db";
 import { CommentCreationRequest } from "./validators/comment";
@@ -919,4 +919,57 @@ export async function unbanUser(communityId: string, userId: string) {
 	} catch (error) {
 		return ActionResponse(500, "An unexpected server error occurred. Please try again later.");
 	}
+}
+
+export async function getUser(id: string) {
+	return await db.user.findUnique({
+		where: { id },
+	});
+}
+
+interface Chats {
+	[key: string]: {
+		id: string;
+		user: User;
+		messages: Message[];
+	};
+}
+
+export async function getChats(id: string): Promise<Chats> {
+	const messages = await db.message.findMany({
+		where: {
+			OR: [
+				{
+					fromId: id,
+				},
+				{
+					toId: id,
+				},
+			],
+		},
+		orderBy: {
+			createdAt: "asc",
+		},
+	});
+
+	const chatMap: Chats = {};
+
+	const userMap: Record<string, User> = {};
+
+	for (const message of messages) {
+		const otherId = message.fromId === id ? message.toId : message.fromId;
+
+		const user = userMap[otherId] || (await getUser(otherId));
+		if (!user) continue;
+		userMap[otherId] = user;
+
+		chatMap[otherId] ||= {
+			id: otherId,
+			user,
+			messages: [],
+		};
+		chatMap[otherId].messages.push(message);
+	}
+
+	return chatMap;
 }

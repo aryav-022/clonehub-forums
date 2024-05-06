@@ -21,6 +21,8 @@ const Page = async ({ params: { username } }: PageProps) => {
 
 	if (!user) return notFound();
 
+	if (session.user.id !== user.id) return notFound();
+
 	return (
 		<section className="col-span-5 space-y-4 py-8 sm:p-8 lg:col-span-4">
 			<h1 className="text-3xl font-semibold">User Settings</h1>
